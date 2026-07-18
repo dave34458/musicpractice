@@ -1,3 +1,16 @@
+<div align="center">
+  <img src="static/backingtracks/img/logo.svg" alt="MusicPractice" width="600">
+  <br>
+  <br>
+  <p>
+    <img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python">
+    <img src="https://img.shields.io/badge/django-4.2+-green.svg" alt="Django">
+    <img src="https://img.shields.io/badge/demucs-htdemucs_6s-orange.svg" alt="Demucs">
+  </p>
+</div>
+
+<br>
+
 # MusicPractice
 
 A web app that turns YouTube videos into practice tools for musicians.
