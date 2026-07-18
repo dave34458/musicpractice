@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Processing{% endblock %}
+{% block content %}
+<div class="processing-view animate-scale-in">
+  <div class="processing-turntable"></div>
+
+  <div style="text-align:center;">
+    <h1 style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;margin-bottom:0.25rem;">Processing your track</h1>
+    <p style="font-size:0.8125rem;font-family:var(--font-mono);color:var(--studio-muted);max-width:24rem;word-break:break-all;">{{ track.youtube_url }}</p>
+  </div>
+
+  <span class="processing-status">{{ track.get_status_display }}</span>
+
+  <!-- Stem progress visualization -->
+  <div class="stem-progress-list">
+    <div class="stem-progress-item">
+      <span class="stem-progress-name" style="font-family:var(--font-display);">Audio</span>
+      <div class="stem-progress-bar">
+        <div class="stem-progress-fill" style="width:{% if track.status == 'queued' %}0{% elif track.status == 'downloading' %}25{% elif track.status == 'processing' %}60{% elif track.status == 'ready' %}100{% else %}0{% endif %}%;"></div>
+      </div>
+      <span class="stem-progress-status">{% if track.status == 'queued' %}Waiting{% elif track.status == 'downloading' %}Download{% elif track.status == 'processing' %}Separating{% elif track.status == 'ready' %}Done{% else %}Failed{% endif %}</span>
+    </div>
+    <div class="stem-progress-item">
+      <span class="stem-progress-name" style="font-family:var(--font-display);">BPM</span>
+      <div class="stem-progress-bar">
+        <div class="stem-progress-fill" style="width:{% if track.status == 'queued' %}0{% elif track.status == 'downloading' %}0{% elif track.status == 'processing' %}40{% elif track.status == 'ready' %}100{% else %}0{% endif %}%;"></div>
+      </div>
+      <span class="stem-progress-status">{% if track.status == 'ready' %}Done{% elif track.status == 'processing' %}Analyzing{% else %}Pending{% endif %}</span>
+    </div>
+    <div class="stem-progress-item">
+      <span class="stem-progress-name" style="font-family:var(--font-display);">Stems</span>
+      <div class="stem-progress-bar">
+        <div class="stem-progress-fill" style="width:{% if track.status == 'ready' %}100{% elif track.status == 'processing' %}30{% else %}0{% endif %}%;"></div>
+      </div>
+      <span class="stem-progress-status">{% if track.status == 'ready' %}Done{% elif track.status == 'processing' %}Demucs{% else %}Pending{% endif %}</span>
+    </div>
+  </div>
+
+  <!-- Queue position -->
+  <p id="queue-pos" style="display:none;font-size:0.75rem;font-family:var(--font-mono);color:var(--studio-muted);margin-top:0.5rem;">
+    Position in queue: <span id="pos-num" style="color:var(--studio-amber);"></span>
+  </p>
+
+  {% if track.status == 'error' %}
+  <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+    <a href="/backingtracks/" style="padding:0.5rem 1rem;border-radius:var(--radius-sm);font-size:0.8125rem;color:var(--studio-muted);text-decoration:none;border:1px solid var(--studio-border);">Back to Backing Tracks</a>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  (function poll() {
+    fetch('/backingtracks/{{ track.id }}/status/', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'ready') window.location.href = '/backingtracks/{{ track.id }}/';
+        else if (data.status === 'error' || data.status === 'rejected') window.location.href = '/backingtracks/';
+        else {
+          if (data.position) {
+            document.getElementById('queue-pos').style.display = 'block';
+            document.getElementById('pos-num').textContent = data.position;
+          }
+          setTimeout(poll, 2000);
+        }
+      })
+      .catch(() => setTimeout(poll, 2000));
+  })();
+</script>
+{% endblock %}
