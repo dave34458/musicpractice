@@ -14,6 +14,10 @@ env/
 # Media (user-generated content)
 media/
 
+# Database
+db.sqlite3
+*.db
+
 # Static
 staticfiles/
 
