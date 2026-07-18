@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ track.title }} - Practice{% endblock %}
+{% block content %}
+<div x-data="player()" x-init="init()" class="console-wrapper">
+  <!-- Transport -->
+  <div class="console-transport animate-fade-up" style="position:relative;overflow:hidden;">
+    <canvas id="visualizer" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+    {% if track.image %}
+    <div style="position:absolute;inset:0;background-size:cover;background-position:center;background-image:url('{{ track.image.url }}');filter:blur(40px) brightness(0.25);opacity:0.5;"></div>
+    {% endif %}
+    <div style="position:relative;z-index:1;display:flex;align-items:center;gap:1.25rem;padding:0.5rem 0;width:100%;">
+      {% if track.image %}
+      <div style="flex-shrink:0;width:80px;height:80px;border-radius:var(--radius-md);overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.5);">
+        <img src="{{ track.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover;">
+      </div>
+      {% endif %}
+      <div style="min-width:0;flex:1;">
+        <div class="transport-badge">
+          Now Playing
+          <a href="/backingtracks/{{ track.id }}/edit/" style="margin-left:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;font-size:0.625rem;color:var(--studio-muted);text-decoration:none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit
+          </a>
+        </div>
+        <div class="transport-title" x-text="track.title"></div>
+        <div class="transport-meta" x-text="track.artist ? track.artist + ' \u00b7 ' + track.bpm + ' BPM' + (track.key ? ' \u00b7 ' + track.key : '') : track.bpm + ' BPM' + (track.key ? ' \u00b7 ' + track.key : '')"></div>
+      </div>
+      <div class="transport-controls" style="flex-shrink:0;margin-left:auto;">
+        <button @click="stop()" class="btn-transport-sm" :disabled="!ready">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+        </button>
+        <button @click="togglePlay()" :disabled="!ready" class="btn-transport">
+          <template x-if="!ready">
+            <span class="loading loading-spinner loading-sm"></span>
+          </template>
+          <template x-if="ready && !playing">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="margin-left:2px;"><polygon points="5,3 19,12 5,21"/></svg>
+          </template>
+          <template x-if="ready && playing">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          </template>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div x-show="ready" class="animate-fade-up delay-1">
+    <div class="progress-strip" @click="seek($event)">
+      <div class="progress-strip-fill" :style="'width:' + progressPct + '%'"></div>
+    </div>
+    <div class="progress-time">
+      <span x-text="formatTime(currentTime)"></span>
+      <span x-text="formatTime(duration)"></span>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div x-show="!ready" class="animate-fade-in" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);gap:1rem;">
+    <div class="processing-turntable" style="width:48px;height:48px;"></div>
+    <p style="font-size:0.8125rem;font-family:var(--font-mono);color:var(--studio-muted);">Loading stems...</p>
+  </div>
+
+  <!-- Master Volume -->
+  <div x-show="ready" class="animate-fade-up delay-2" style="margin-top:1.5rem;">
+    <div class="master-strip">
+      <span class="master-label">Master</span>
+      <div class="master-fader-wrap">
+        <div class="fader-track">
+           <input type="range" min="0" max="100" x-model="masterVolume"
+                  x-on:input="engine.setMasterVolume($event.target.value / 100)"
+                  class="fader">
+        </div>
+        <span class="fader-value" x-text="masterVolume"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mixer -->
+  <div x-show="ready" class="animate-fade-up delay-3">
+    <div class="mixer">
+      <div class="mixer-header">
+        <span class="mixer-header-label">Channel Strip</span>
+        <span class="mixer-header-count" x-text="stems.length + ' channels'"></span>
+      </div>
+      <template x-for="(stem, i) in stems" :key="stem.name">
+        <div class="channel">
+          <span class="channel-num" x-text="i + 1"></span>
+          <div class="channel-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21"/></svg>
+          </div>
+          <span class="channel-name" x-text="stem.name"></span>
+
+          <!-- Mini waveform -->
+          <div class="channel-waveform">
+            <template x-for="(v, j) in (channelWaveforms[i] || [])" :key="j">
+              <div class="bar"
+                   :style="'height:' + (v * 28 + 2) + 'px;'"
+                   :class="playing ? 'active' : ''"></div>
+            </template>
+          </div>
+
+          <button @click="toggleMute(stem.name)" :class="muted[stem.name] ? 'active' : ''" class="btn-mute">M</button>
+          <button @click="toggleSolo(stem.name)" :class="soloed[stem.name] ? 'active' : ''" class="btn-solo">S</button>
+
+          <!-- Fader -->
+          <div class="fader-wrap">
+            <div class="fader-track">
+              <input type="range" min="0" max="100" x-model="volumes[stem.name]"
+                     x-on:input="engine.setVolume(stem.name, $event.target.value / 100)"
+                     class="fader">
+            </div>
+            <span class="fader-value" x-text="volumes[stem.name]"></span>
+          </div>
+
+          <a :href="stem.url" download class="btn-dl">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          </a>
+        </div>
+      </template>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STEMS_DATA = {{ stems_json|safe }};
+  const TRACK_DATA = {
+    title: '{{ track.title|escapejs }}',
+    artist: '{{ track.artist|escapejs }}',
+    bpm: {{ track.bpm|floatformat:0|default:"120" }},
+    key: '{{ track.key|escapejs }}',
+  };
+</script>
+<script src="{% static 'backingtracks/js/audio-engine.js' %}"></script>
+<script src="{% static 'backingtracks/js/player-init.js' %}"></script>
+{% endblock %}

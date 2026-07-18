@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="animate-fade-up">
+  <div class="studio-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p style="font-size:0.8125rem;color:var(--studio-muted);margin-top:0.125rem;font-family:var(--font-mono);">{{ total }} track{{ total|pluralize }} total</p>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin-bottom:2rem;">
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1.25rem;">
+      <div style="font-size:1.75rem;font-weight:700;font-family:var(--font-display);">{{ total }}</div>
+      <div style="font-size:0.75rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.25rem;">Total Tracks</div>
+    </div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1.25rem;">
+      <div style="font-size:1.75rem;font-weight:700;font-family:var(--font-display);color:var(--studio-green);">{{ ready }}</div>
+      <div style="font-size:0.75rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.25rem;">Ready</div>
+    </div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1.25rem;">
+      <div style="font-size:1.75rem;font-weight:700;font-family:var(--font-display);color:var(--studio-amber);">{{ processing }}</div>
+      <div style="font-size:0.75rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.25rem;">Processing</div>
+    </div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1.25rem;">
+      <div style="font-size:1.75rem;font-weight:700;font-family:var(--font-display);">{{ queued }}</div>
+      <div style="font-size:0.75rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.25rem;">Queued</div>
+    </div>
+  </div>
+
+  <!-- Recent Tracks -->
+  <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--studio-border);">
+      <h3 style="font-family:var(--font-display);font-size:0.9375rem;font-weight:600;">Recently Added</h3>
+      {% if total > 0 %}<a href="/backingtracks/" style="font-size:0.75rem;color:var(--studio-amber);text-decoration:none;">View all</a>{% endif %}
+    </div>
+    {% if recent %}
+      {% for track in recent %}
+      <a href="{% if track.status == 'ready' %}/backingtracks/{{ track.id }}/{% else %}/backingtracks/{{ track.id }}/status/{% endif %}" style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.25rem;text-decoration:none;border-bottom:1px solid var(--studio-border);transition:background 0.15s ease;{% if not forloop.last %}border-bottom:1px solid var(--studio-border);{% endif %}" onmouseover="this.style.background='var(--studio-amber-dim)'" onmouseout="this.style.background=''">
+          <div>
+            <div style="font-size:0.875rem;font-weight:500;color:var(--studio-text);">{{ track.title|default:track.youtube_url|truncatechars:40 }}</div>
+            <div style="font-size:0.6875rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.125rem;">{{ track.created_at|date:"M j, Y" }}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            {% if track.status == 'ready' %}
+              <span style="font-size:0.625rem;color:var(--studio-green);font-family:var(--font-mono);">Ready</span>
+            {% elif track.status == 'error' %}
+              <span style="font-size:0.625rem;color:var(--studio-red);font-family:var(--font-mono);">Error</span>
+            {% else %}
+              <span style="font-size:0.625rem;color:var(--studio-amber);font-family:var(--font-mono);">{{ track.get_status_display }}</span>
+            {% endif %}
+          </div>
+        </a>
+      {% endfor %}
+    {% else %}
+      <div style="padding:2.5rem 1.25rem;text-align:center;">
+        <p style="font-size:0.8125rem;color:var(--studio-muted);">No tracks yet. Head over to <a href="/backingtracks/" style="color:var(--studio-amber);text-decoration:none;">Backing Tracks</a> to add your first one.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
