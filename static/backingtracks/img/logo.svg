@@ -5,12 +5,12 @@
       <stop offset="100%" stop-color="#EA580C"/>
     </linearGradient>
   </defs>
-  <g transform="translate(50, 38)">
+  <g transform="translate(130, 38)">
     <rect x="0" y="40" width="8" height="80" rx="2" fill="url(#g)" opacity="0.5"/>
     <rect x="16" y="20" width="8" height="100" rx="2" fill="url(#g)" opacity="0.7"/>
     <rect x="32" y="10" width="8" height="110" rx="2" fill="url(#g)" opacity="0.9"/>
     <rect x="48" y="20" width="8" height="100" rx="2" fill="url(#g)" opacity="0.7"/>
     <rect x="64" y="40" width="8" height="80" rx="2" fill="url(#g)" opacity="0.5"/>
   </g>
-  <text x="170" y="130" font-family="'Bricolage Grotesque', sans-serif" font-size="64" font-weight="700" letter-spacing="-1.5" fill="#E8E0D4">Music<tspan fill="url(#g)">Practice</tspan></text>
+  <text x="250" y="130" font-family="'Bricolage Grotesque', sans-serif" font-size="64" font-weight="700" letter-spacing="-1.5" fill="#E8E0D4">Music<tspan fill="url(#g)">Practice</tspan></text>
 </svg>
