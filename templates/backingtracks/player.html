@@ -18,7 +18,7 @@
       <div style="min-width:0;flex:1;">
         <div class="transport-badge">
           Now Playing
-          <a href="/backingtracks/{{ track.id }}/edit/" style="margin-left:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;font-size:0.625rem;color:var(--studio-muted);text-decoration:none;">
+          <a href="/backingtracks/{{ track.id }}/edit/" class="btn-edit-sm">
             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Edit
           </a>
@@ -113,10 +113,6 @@
             </div>
             <span class="fader-value" x-text="volumes[stem.name]"></span>
           </div>
-
-          <a :href="stem.url" download class="btn-dl">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-          </a>
         </div>
       </template>
     </div>

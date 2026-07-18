@@ -359,6 +359,30 @@ body::after {
   margin-bottom: 0.25rem;
 }
 
+.btn-edit-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.5625rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--studio-amber);
+  background: transparent;
+  border: 1px solid rgba(217, 119, 6, 0.2);
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.btn-edit-sm:hover {
+  background: var(--studio-amber-dim);
+  border-color: rgba(217, 119, 6, 0.4);
+  box-shadow: var(--studio-glow-amber);
+}
+
 .transport-title {
   font-family: var(--font-display);
   font-size: 1.5rem;
