@@ -11,7 +11,7 @@
     {% endif %}
     <div style="position:relative;z-index:1;display:flex;align-items:center;gap:1.25rem;padding:0.5rem 0;width:100%;">
       {% if track.image %}
-      <div style="flex-shrink:0;width:80px;height:80px;border-radius:var(--radius-md);overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.5);">
+      <div class="track-art" style="flex-shrink:0;width:80px;height:80px;border-radius:var(--radius-md);overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.5);">
         <img src="{{ track.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover;">
       </div>
       {% endif %}
@@ -63,7 +63,7 @@
   </div>
 
   <!-- Master Volume -->
-  <div x-show="ready" class="animate-fade-up delay-2" style="margin-top:1.5rem;">
+  <div x-show="ready" class="animate-fade-up delay-2">
     <div class="master-strip">
       <span class="master-label">Master</span>
       <div class="master-fader-wrap">
@@ -87,9 +87,9 @@
       <template x-for="(stem, i) in stems" :key="stem.name">
         <div class="channel">
           <span class="channel-num" x-text="i + 1"></span>
-          <div class="channel-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21"/></svg>
-          </div>
+          <a :href="stem.url" download class="btn-dl" :title="'Download ' + stem.name">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </a>
           <span class="channel-name" x-text="stem.name"></span>
 
           <!-- Mini waveform -->

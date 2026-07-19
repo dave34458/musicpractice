@@ -14,15 +14,18 @@
   <link rel="stylesheet" href="/static/backingtracks/css/style.css">
   {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body x-data="{ drawerOpen: false }">
   <!-- Fixed Top Navigation -->
   <nav class="studio-nav">
     <div class="studio-nav-brand">
-      <div class="vinyl-record" style="width:28px;height:28px;"></div>
       <a href="/" style="font-family:var(--font-display);font-weight:700;font-size:1rem;color:var(--studio-text);text-decoration:none;">MusicPractice</a>
     </div>
 
     <div class="studio-nav-links">
+      <a href="#" class="studio-nav-link" style="opacity:0.35;pointer-events:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        Ear Training
+      </a>
       <a href="/" class="studio-nav-link {% if request.path == '/' %}active{% endif %}">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Dashboard
@@ -35,28 +38,69 @@
 
     <div class="studio-nav-actions">
       {% if user.is_authenticated %}
-        <div style="display:flex;align-items:center;gap:0.5rem;margin-left:0.5rem;padding-left:0.75rem;border-left:1px solid var(--studio-border);">
+        <div class="studio-nav-auth" style="display:flex;align-items:center;gap:0.375rem;">
           <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6875rem;font-weight:700;background:var(--studio-amber-dim);color:var(--studio-amber);flex-shrink:0;">{{ user.username|first|upper }}</div>
-          <span style="font-size:0.8125rem;font-weight:500;display:none;" class="sm:inline">{{ user.username }}</span>
-          <form method="post" action="/logout/" style="display:inline;">
+          <form method="post" action="/logout/" style="display:flex;align-items:center;">
             {% csrf_token %}
-            <button type="submit" style="font-size:0.6875rem;color:var(--studio-muted);background:none;border:none;cursor:pointer;">Logout</button>
+            <button type="submit" style="font-size:0.6875rem;line-height:1;color:var(--studio-muted);background:none;border:none;cursor:pointer;">Logout</button>
           </form>
         </div>
       {% else %}
-        <a href="/login/" style="padding:0.375rem 0.75rem;border-radius:var(--radius-sm);font-size:0.75rem;font-weight:500;color:var(--studio-muted);text-decoration:none;">Login</a>
-        <a href="/register/" style="padding:0.375rem 0.875rem;border-radius:var(--radius-sm);font-size:0.75rem;font-weight:600;background:var(--studio-amber);color:#fff;text-decoration:none;box-shadow:var(--studio-glow-amber);">Register</a>
+        <div class="studio-nav-auth" style="display:flex;align-items:center;gap:0.5rem;">
+          <a href="/login/" style="padding:0.375rem 0.75rem;border-radius:var(--radius-sm);font-size:0.75rem;font-weight:500;color:var(--studio-muted);text-decoration:none;">Login</a>
+          <a href="/register/" style="padding:0.375rem 0.875rem;border-radius:var(--radius-sm);font-size:0.75rem;font-weight:600;background:var(--studio-amber);color:#fff;text-decoration:none;box-shadow:var(--studio-glow-amber);">Register</a>
+        </div>
       {% endif %}
+      <button @click="drawerOpen = !drawerOpen" class="studio-nav-toggle" :class="drawerOpen ? 'active' : ''">
+        <template x-if="!drawerOpen">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </template>
+        <template x-if="drawerOpen">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </template>
+      </button>
     </div>
   </nav>
 
+  <!-- Mobile Drawer -->
+  <div class="studio-nav-drawer" :class="drawerOpen ? 'open' : ''" @click.away="drawerOpen = false">
+    <a href="#" class="studio-nav-link" onclick="return false" style="opacity:0.4;" @click="drawerOpen = false">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Ear Training
+    </a>
+    <a href="/" class="studio-nav-link {% if request.path == '/' %}active{% endif %}" @click="drawerOpen = false">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Dashboard
+    </a>
+    <a href="/backingtracks/" class="studio-nav-link {% if request.path == '/backingtracks/' %}active{% endif %}" @click="drawerOpen = false">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Backing Tracks
+    </a>
+    {% if user.is_authenticated %}
+    <div class="studio-nav-auth">
+      <div style="display:flex;align-items:center;gap:0.5rem;">
+        <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6875rem;font-weight:700;background:var(--studio-amber-dim);color:var(--studio-amber);flex-shrink:0;">{{ user.username|first|upper }}</div>
+        <span style="font-size:0.8125rem;font-weight:500;">{{ user.username }}</span>
+      </div>
+      <form method="post" action="/logout/" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" style="font-size:0.75rem;color:var(--studio-muted);background:none;border:none;cursor:pointer;">Logout</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="studio-nav-auth">
+      <a href="/login/" style="flex:1;text-align:center;padding:0.5rem 0.75rem;border-radius:var(--radius-sm);font-size:0.8125rem;font-weight:500;color:var(--studio-muted);text-decoration:none;border:1px solid var(--studio-border);">Login</a>
+      <a href="/register/" style="flex:1;text-align:center;padding:0.5rem 0.75rem;border-radius:var(--radius-sm);font-size:0.8125rem;font-weight:600;background:var(--studio-amber);color:#fff;text-decoration:none;box-shadow:var(--studio-glow-amber);">Register</a>
+    </div>
+    {% endif %}
+  </div>
+
   <!-- Main Content -->
-  <main class="studio-main">
+  <main class="studio-main" @click="drawerOpen = false">
     <div class="studio-content">
       {% block content %}{% endblock %}
     </div>
   </main>
-
 
 </body>
 </html>

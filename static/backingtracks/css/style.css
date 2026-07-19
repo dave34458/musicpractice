@@ -67,9 +67,9 @@ body::after {
   left: 0;
   right: 0;
   z-index: 100;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 1.5rem;
   height: 56px;
   background: rgba(13, 13, 13, 0.85);
@@ -81,15 +81,24 @@ body::after {
 .studio-nav-brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  justify-self: start;
+  flex-shrink: 0;
+}
+
+.studio-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .studio-nav-links {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  justify-self: center;
 }
 
 .studio-nav-link {
@@ -114,13 +123,6 @@ body::after {
 .studio-nav-link.active {
   color: var(--studio-amber);
   background: var(--studio-amber-dim);
-}
-
-.studio-nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  justify-self: end;
 }
 
 /* ============================================
@@ -916,6 +918,89 @@ input[type="range"].fader::-moz-range-thumb {
 
 @media (min-width: 768px) {
   .studio-auth-visual { display: flex; }
+}
+
+/* ============================================
+   Mobile Responsive
+   ============================================ */
+@media (max-width: 767px) {
+  .studio-content { padding: 1.25rem 1rem; }
+  .studio-nav-links { display: none; }
+  .studio-nav-actions .studio-nav-auth { display: none; }
+  .studio-nav { padding: 0 1rem; }
+  .studio-header h1 { font-size: 1.375rem; }
+  .transport-title { font-size: 1.125rem !important; }
+  .console-transport { gap: 0.75rem !important; }
+  .console-transport > div { gap: 0.75rem !important; }
+  .track-art { width: 48px !important; height: 48px !important; }
+  .channel-waveform { display: none !important; }
+  .fader-wrap { width: 80px !important; }
+  .channel { gap: 0.375rem !important; flex-wrap: nowrap !important; }
+  .channel-num { display: none; }
+  .project-card-art { height: 100px !important; }
+  .edit-cover { width: 120px !important; height: 120px !important; }
+  .mixer { overflow-x: auto; }
+  .mixer::-webkit-scrollbar { height: 3px; }
+  .studio-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 480px) {
+  .studio-content { padding: 0.875rem 0.75rem; }
+  .console-transport { gap: 0.5rem !important; }
+  .console-transport > div { gap: 0.5rem !important; flex-wrap: wrap !important; }
+  .transport-controls { margin-left: 0 !important; }
+  .fader-wrap { width: 60px !important; }
+  .fader-value { display: none; }
+  .btn-transport { width: 40px !important; height: 40px !important; }
+  .btn-transport-sm { width: 32px !important; height: 32px !important; }
+  .studio-nav { padding: 0 0.75rem; }
+}
+
+/* Mobile drawer */
+.studio-nav-drawer {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background: rgba(13, 13, 13, 0.98);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border-bottom: 1px solid var(--studio-border);
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transform: translateY(-120%);
+  transition: transform 0.25s ease;
+}
+.studio-nav-drawer.open { transform: translateY(0); }
+.studio-nav-drawer .studio-nav-link { padding: 0.625rem 0.75rem; font-size: 0.875rem; }
+.studio-nav-drawer .studio-nav-auth { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0.5rem; margin-top: 0.25rem; border-top: 1px solid var(--studio-border); justify-content: space-between; }
+.studio-nav-toggle {
+  display: none;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-sm);
+  color: var(--studio-text);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.studio-nav-toggle:hover { background: rgba(255,255,255,0.04); }
+@media (max-width: 767px) {
+  .studio-nav-toggle { display: flex; }
+  .table-scroll { overflow-x: auto; }
+  .hide-mobile { display: none !important; }
+}
+.studio-nav-toggle svg { width: 18px; height: 18px; }
+.table-scroll { overflow-x: auto; }
+
+@media (min-width: 768px) {
+  .studio-nav-drawer { display: none !important; }
 }
 
 /* ============================================

@@ -43,3 +43,17 @@ class Stem(models.Model):
     def filename(self):
         import os
         return os.path.basename(self.audio_file.name)
+
+class Playlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='playlists')
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, default='')
+    image = models.ImageField(upload_to='playlist_images/', null=True, blank=True)
+    tracks = models.ManyToManyField(BackingTrack, related_name='playlists', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.name

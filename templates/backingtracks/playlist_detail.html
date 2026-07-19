@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}{{ playlist.name }}{% endblock %}
+{% block content %}
+
+<div class="animate-fade-up">
+  <div class="studio-header">
+    <h1 style="font-size:1.375rem;">{{ playlist.name }}</h1>
+    <div style="display:flex;gap:0.5rem;">
+      <a href="/playlists/{{ playlist.id }}/edit/" class="btn-studio" style="background:transparent;color:var(--studio-muted);padding:0.375rem 0.75rem;font-size:0.75rem;">Edit</a>
+      <form method="post" action="/playlists/{{ playlist.id }}/delete/" onsubmit="return confirm('Delete this playlist?')" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn-studio" style="background:transparent;color:var(--studio-red);padding:0.375rem 0.75rem;font-size:0.75rem;">Delete</button>
+      </form>
+    </div>
+  </div>
+
+  {% if playlist.tracks.all %}
+  <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:1rem;">
+    <div class="table-scroll">
+    <table style="width:100%;border-collapse:collapse;font-size:0.75rem;font-family:var(--font-mono);">
+      <thead>
+        <tr style="border-bottom:1px solid var(--studio-border);color:var(--studio-dim);font-size:0.625rem;text-transform:uppercase;letter-spacing:0.05em;">
+          <th style="padding:0.375rem 0.75rem;text-align:left;font-weight:500;width:36px;"></th>
+          <th style="padding:0.375rem 0.75rem;text-align:left;font-weight:500;">Title</th>
+          <th class="hide-mobile" style="padding:0.375rem 0.75rem;text-align:left;font-weight:500;">Artist</th>
+          <th style="padding:0.375rem 0.5rem;text-align:center;font-weight:500;">BPM</th>
+          <th class="hide-mobile" style="padding:0.375rem 0.5rem;text-align:center;font-weight:500;">Key</th>
+          <th style="padding:0.375rem 0.75rem;text-align:center;font-weight:500;">Status</th>
+          <th style="padding:0.375rem 0.5rem;text-align:center;font-weight:500;width:36px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for track in playlist.tracks.all %}
+        <tr onclick="window.location='{% if track.status == 'ready' %}/backingtracks/{{ track.id }}/{% else %}/backingtracks/{{ track.id }}/status/{% endif %}'"
+            style="cursor:pointer;border-bottom:1px solid var(--studio-border);transition:background 0.15s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background=''">
+          <td style="padding:0.375rem 0.75rem;">
+            <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:var(--studio-surface);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+              {% if track.image %}
+              <img src="{{ track.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover;">
+              {% else %}
+              <div style="font-size:0.75rem;font-weight:700;color:var(--studio-dim);">{{ track.title|default:'♪'|first|upper }}</div>
+              {% endif %}
+            </div>
+          </td>
+          <td style="padding:0.375rem 0.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;color:var(--studio-text);font-weight:500;font-family:var(--font-body);font-size:0.8125rem;">{{ track.title|default:track.youtube_url|truncatechars:40 }}</td>
+          <td class="hide-mobile" style="padding:0.375rem 0.75rem;color:var(--studio-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;">{{ track.artist|default:"—" }}</td>
+          <td style="padding:0.375rem 0.5rem;text-align:center;color:var(--studio-dim);">{{ track.bpm|floatformat:0|default:"—" }}</td>
+          <td class="hide-mobile" style="padding:0.375rem 0.5rem;text-align:center;color:var(--studio-amber);">{{ track.key|default:"—" }}</td>
+          <td style="padding:0.375rem 0.75rem;text-align:center;">
+            {% if track.status == 'ready' %}
+              <span style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--studio-green);">
+                <span style="width:5px;height:5px;border-radius:50%;background:var(--studio-green);box-shadow:var(--studio-glow-green);"></span>
+                Ready
+              </span>
+            {% elif track.status == 'error' %}
+              <span style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--studio-red);">
+                <span style="width:5px;height:5px;border-radius:50%;background:var(--studio-red);box-shadow:var(--studio-glow-red);"></span>
+                Error
+              </span>
+            {% else %}
+              <span style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--studio-amber);">
+                <span style="width:5px;height:5px;border-radius:50%;background:var(--studio-amber);animation:pulse-dot 1.5s ease-in-out infinite;"></span>
+                {{ track.get_status_display }}
+              </span>
+            {% endif %}
+          </td>
+          <td style="padding:0.375rem 0.5rem;text-align:center;">
+            <form method="post" action="/backingtracks/{{ track.id }}/remove-from-playlist/{{ playlist.id }}/" onclick="event.stopPropagation()" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" style="width:24px;height:24px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--studio-dim);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" onmouseover="this.style.color='var(--studio-red)'" onmouseout="this.style.color='var(--studio-dim)'" title="Remove from playlist">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  {% else %}
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;text-align:center;background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);margin-bottom:1rem;">
+    <div class="processing-turntable" style="width:40px;height:40px;margin-bottom:0.75rem;"></div>
+    <p style="color:var(--studio-muted);font-size:0.8125rem;">No tracks in this playlist yet.</p>
+  </div>
+  {% endif %}
+
+  {% if available_tracks %}
+  <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);padding:0.75rem;">
+    <form method="post" action="/playlists/add-track/" style="display:flex;gap:0.5rem;align-items:center;">
+      {% csrf_token %}
+      <input type="hidden" name="playlist_id" value="{{ playlist.id }}">
+      <select name="track_id" style="flex:1;padding:0.375rem 0.5rem;border-radius:var(--radius-sm);border:1px solid var(--studio-border);background:var(--studio-surface);color:var(--studio-text);font-size:0.75rem;font-family:var(--font-mono);">
+        {% for t in available_tracks %}
+        <option value="{{ t.id }}">{{ t.title|default:t.youtube_url|truncatechars:50 }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn-studio" style="padding:0.375rem 0.75rem;font-size:0.75rem;">Add Track</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
