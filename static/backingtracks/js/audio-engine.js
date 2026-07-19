@@ -6,6 +6,7 @@ class AudioEngine {
     this.sources = {};
     this.muted = {};
     this.soloed = {};
+    this.customVolumes = {};
     this.analysers = {};
     this.masterAnalyser = null;
     this.masterGain = null;
@@ -47,13 +48,14 @@ class AudioEngine {
 
       const gain = this.ctx.createGain();
       const anySolo = Object.values(this.soloed).some(v => v);
+      const savedVol = this.customVolumes[name] ?? 1;
 
       if (this.muted[name]) {
         gain.gain.value = 0;
       } else if (anySolo && !this.soloed[name]) {
         gain.gain.value = 0;
       } else {
-        gain.gain.value = 1;
+        gain.gain.value = savedVol;
       }
 
       source.connect(gain);
@@ -124,6 +126,7 @@ class AudioEngine {
   }
 
   setVolume(name, value) {
+    this.customVolumes[name] = value;
     if (this.gains[name]) this.gains[name].gain.value = value;
   }
 
@@ -155,10 +158,13 @@ class AudioEngine {
   _applyMuteSolo() {
     const anySolo = Object.values(this.soloed).some(v => v);
     for (const name of Object.keys(this.gains)) {
-      let vol = 1;
-      if (this.muted[name]) vol = 0;
-      else if (anySolo && !this.soloed[name]) vol = 0;
-      this.gains[name].gain.value = vol;
+      if (this.muted[name]) {
+        this.gains[name].gain.value = 0;
+      } else if (anySolo && !this.soloed[name]) {
+        this.gains[name].gain.value = 0;
+      } else {
+        this.gains[name].gain.value = this.customVolumes[name] ?? 1;
+      }
     }
   }
 

@@ -5,59 +5,234 @@
   <div class="studio-header">
     <div>
       <h1>Dashboard</h1>
-      <p style="font-size:0.8125rem;color:var(--studio-muted);margin-top:0.125rem;font-family:var(--font-mono);">{{ total }} track{{ total|pluralize }} total</p>
+      <p style="font-size:0.8125rem;color:var(--studio-muted);margin-top:0.125rem;font-family:var(--font-mono);">
+        {{ total }} track{{ total|pluralize }}
+        {% if practice_hours or practice_minutes %}
+          · {{ practice_hours }}h{% if practice_minutes %} {{ practice_minutes }}m{% endif %} of practice material
+        {% endif %}
+      </p>
     </div>
   </div>
 
-  <!-- Stats Cards -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin-bottom:2rem;">
-    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1.25rem;">
-      <div style="font-size:1.75rem;font-weight:700;font-family:var(--font-display);">{{ total }}</div>
-      <div style="font-size:0.75rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.25rem;">Total Tracks</div>
+  <!-- Stat Cards -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.75rem;margin-bottom:2rem;">
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1rem 1.125rem;">
+      <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-display);">{{ total }}</div>
+      <div style="font-size:0.6875rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.125rem;">Total</div>
     </div>
-    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1.25rem;">
-      <div style="font-size:1.75rem;font-weight:700;font-family:var(--font-display);color:var(--studio-green);">{{ ready }}</div>
-      <div style="font-size:0.75rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.25rem;">Ready</div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1rem 1.125rem;">
+      <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-display);color:var(--studio-green);">{{ ready }}</div>
+      <div style="font-size:0.6875rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.125rem;">Ready</div>
     </div>
-    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1.25rem;">
-      <div style="font-size:1.75rem;font-weight:700;font-family:var(--font-display);color:var(--studio-amber);">{{ processing }}</div>
-      <div style="font-size:0.75rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.25rem;">Processing</div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1rem 1.125rem;">
+      <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-display);color:var(--studio-amber);">{{ processing }}</div>
+      <div style="font-size:0.6875rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.125rem;">Processing</div>
     </div>
-    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1.25rem;">
-      <div style="font-size:1.75rem;font-weight:700;font-family:var(--font-display);">{{ queued }}</div>
-      <div style="font-size:0.75rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.25rem;">Queued</div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1rem 1.125rem;">
+      <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-display);color:var(--studio-blue);">{{ queued }}</div>
+      <div style="font-size:0.6875rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.125rem;">Queued</div>
+    </div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1rem 1.125rem;">
+      <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-display);color:var(--studio-red);">{{ error }}</div>
+      <div style="font-size:0.6875rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.125rem;">Errors</div>
+    </div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1rem 1.125rem;">
+      <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-display);">{{ stem_count }}</div>
+      <div style="font-size:0.6875rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.125rem;">Stems</div>
+    </div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:1rem 1.125rem;">
+      <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-display);">{{ rejected }}</div>
+      <div style="font-size:0.6875rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.125rem;">Rejected</div>
     </div>
   </div>
 
-  <!-- Recent Tracks -->
-  <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);overflow:hidden;">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--studio-border);">
-      <h3 style="font-family:var(--font-display);font-size:0.9375rem;font-weight:600;">Recently Added</h3>
-      {% if total > 0 %}<a href="/backingtracks/" style="font-size:0.75rem;color:var(--studio-amber);text-decoration:none;">View all</a>{% endif %}
-    </div>
-    {% if recent %}
-      {% for track in recent %}
-      <a href="{% if track.status == 'ready' %}/backingtracks/{{ track.id }}/{% else %}/backingtracks/{{ track.id }}/status/{% endif %}" style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.25rem;text-decoration:none;border-bottom:1px solid var(--studio-border);transition:background 0.15s ease;{% if not forloop.last %}border-bottom:1px solid var(--studio-border);{% endif %}" onmouseover="this.style.background='var(--studio-amber-dim)'" onmouseout="this.style.background=''">
-          <div>
-            <div style="font-size:0.875rem;font-weight:500;color:var(--studio-text);">{{ track.title|default:track.youtube_url|truncatechars:40 }}</div>
-            <div style="font-size:0.6875rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.125rem;">{{ track.created_at|date:"M j, Y" }}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:0.5rem;">
-            {% if track.status == 'ready' %}
-              <span style="font-size:0.625rem;color:var(--studio-green);font-family:var(--font-mono);">Ready</span>
-            {% elif track.status == 'error' %}
-              <span style="font-size:0.625rem;color:var(--studio-red);font-family:var(--font-mono);">Error</span>
-            {% else %}
-              <span style="font-size:0.625rem;color:var(--studio-amber);font-family:var(--font-mono);">{{ track.get_status_display }}</span>
-            {% endif %}
-          </div>
-        </a>
-      {% endfor %}
-    {% else %}
-      <div style="padding:2.5rem 1.25rem;text-align:center;">
-        <p style="font-size:0.8125rem;color:var(--studio-muted);">No tracks yet. Head over to <a href="/backingtracks/" style="color:var(--studio-amber);text-decoration:none;">Backing Tracks</a> to add your first one.</p>
+  {% if total > 0 %}
+  <!-- Activity + Highlights -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4" style="margin-bottom:1rem;">
+    <!-- Activity -->
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);padding:1.25rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <h3 style="font-family:var(--font-display);font-size:0.875rem;font-weight:600;">Activity</h3>
+        <span style="font-size:0.6875rem;color:var(--studio-muted);font-family:var(--font-mono);">{{ added_this_week }} this week</span>
       </div>
-    {% endif %}
+      <div style="overflow-x:auto;padding-bottom:0.5rem;" x-init="setTimeout(() => $el.scrollLeft = $el.scrollWidth, 50)">
+        <div style="display:grid;grid-template-rows:repeat(7,14px);grid-auto-flow:column;grid-auto-columns:14px;gap:3px;min-width:max-content;">
+          {% for week in heatmap_weeks %}
+            {% for cell in week %}
+              {% if cell %}
+                <div style="width:14px;height:14px;border-radius:3px;background:{{ cell.color }};border:1px solid rgba(255,255,255,0.04);" title="{{ cell.date|date:'M j, Y' }}: {{ cell.count }} track{{ cell.count|pluralize }}"></div>
+              {% else %}
+                <div style="width:14px;height:14px;border:1px solid rgba(255,255,255,0.02);border-radius:3px;"></div>
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.25rem;">
+          <span style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);">Less</span>
+          <div style="width:12px;height:12px;border-radius:2px;background:#22222A;border:1px solid rgba(255,255,255,0.04);"></div>
+          <div style="width:12px;height:12px;border-radius:2px;background:#4A3A20;"></div>
+          <div style="width:12px;height:12px;border-radius:2px;background:#7A5A20;"></div>
+          <div style="width:12px;height:12px;border-radius:2px;background:#B8860E;"></div>
+          <div style="width:12px;height:12px;border-radius:2px;background:#FFA500;"></div>
+          <span style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);">More</span>
+        </div>
+        <span style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);">{{ added_this_month }} this month</span>
+      </div>
+    </div>
+
+    <!-- Highlights -->
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);padding:1.25rem;">
+      <h3 style="font-family:var(--font-display);font-size:0.875rem;font-weight:600;margin-bottom:1rem;">Studio Stats</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:0.875rem 1rem;">
+          <div style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);margin-bottom:0.25rem;">Total Duration</div>
+          <div style="font-size:1.125rem;font-weight:700;font-family:var(--font-display);">{{ practice_hours }}h{% if practice_minutes %} {{ practice_minutes }}m{% endif %}</div>
+          {% if avg_duration_min %}
+          <div style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.25rem;">Avg {{ avg_duration_min }}m per track</div>
+          {% endif %}
+        </div>
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:0.875rem 1rem;">
+          <div style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);margin-bottom:0.25rem;">Most Played Key</div>
+          {% if most_prolific_key %}
+          <div style="font-size:1.125rem;font-weight:700;font-family:var(--font-display);color:var(--studio-amber);">{{ most_prolific_key.key }}</div>
+          <div style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.25rem;">{{ most_prolific_key.cnt }} track{{ most_prolific_key.cnt|pluralize }} ({% widthratio most_prolific_key.cnt total_keyed 100 %}%)</div>
+          {% else %}
+          <div style="font-size:0.875rem;color:var(--studio-muted);font-family:var(--font-mono);">—</div>
+          {% endif %}
+        </div>
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:0.875rem 1rem;">
+          <div style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);margin-bottom:0.25rem;">Best Streak</div>
+          {% if best_streak > 0 %}
+          <div style="font-size:1.125rem;font-weight:700;font-family:var(--font-display);color:var(--studio-green);">{{ best_streak }} days</div>
+          <div style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.25rem;">consecutive</div>
+          {% else %}
+          <div style="font-size:0.875rem;color:var(--studio-muted);font-family:var(--font-mono);">—</div>
+          {% endif %}
+        </div>
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--studio-border);border-radius:var(--radius-md);padding:0.875rem 1rem;">
+          <div style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);margin-bottom:0.25rem;">Success Rate</div>
+          {% if success_rate %}
+          <div style="font-size:1.125rem;font-weight:700;font-family:var(--font-display);color:var(--studio-amber);">{{ success_rate }}%</div>
+          <div style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);margin-top:0.25rem;">{{ ready }} of {{ finished }} processed</div>
+          {% else %}
+          <div style="font-size:0.875rem;color:var(--studio-muted);font-family:var(--font-mono);">—</div>
+          {% endif %}
+        </div>
+      </div>
+      {% if first_track_date %}
+      <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--studio-border);font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);">
+        First track added {{ first_track_date|date:"M j, Y" }}
+      </div>
+      {% endif %}
+    </div>
   </div>
+
+  <!-- Key + BPM Distribution -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4" style="margin-bottom:2rem;">
+    <!-- Recent Tracks -->
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--studio-border);">
+        <h3 style="font-family:var(--font-display);font-size:0.875rem;font-weight:600;">Recently Added</h3>
+        {% if total > 0 %}<a href="/backingtracks/" style="font-size:0.75rem;color:var(--studio-amber);text-decoration:none;">View all</a>{% endif %}
+      </div>
+      {% if recent %}
+        {% for track in recent %}
+        <a href="{% if track.status == 'ready' %}/backingtracks/{{ track.id }}/{% else %}/backingtracks/{{ track.id }}/status/{% endif %}" style="display:flex;align-items:center;gap:0.875rem;padding:0.75rem 1.25rem;text-decoration:none;{% if not forloop.last %}border-bottom:1px solid var(--studio-border);{% endif %}transition:background 0.15s ease;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background=''">
+            <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:var(--studio-surface);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+              {% if track.image %}
+              <img src="{{ track.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover;">
+              {% else %}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--studio-dim);"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+              {% endif %}
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.8125rem;font-weight:500;color:var(--studio-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ track.title|default:track.youtube_url|truncatechars:45 }}</div>
+              <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.125rem;flex-wrap:wrap;">
+                {% if track.artist %}
+                <span style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);">{{ track.artist }}</span>
+                <span style="font-size:0.5rem;color:var(--studio-dim);">·</span>
+                {% endif %}
+                <span style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);">{{ track.created_at|date:"M j" }}</span>
+                {% if track.bpm %}
+                <span style="font-size:0.5rem;color:var(--studio-dim);">·</span>
+                <span style="font-size:0.625rem;color:var(--studio-dim);font-family:var(--font-mono);">{{ track.bpm|floatformat:0 }} BPM</span>
+                {% endif %}
+                {% if track.key %}
+                <span style="font-size:0.5rem;color:var(--studio-dim);">·</span>
+                <span style="font-size:0.625rem;color:var(--studio-amber);font-family:var(--font-mono);">{{ track.key }}</span>
+                {% endif %}
+                {% if track.duration %}
+                <span style="font-size:0.5rem;color:var(--studio-dim);">·</span>
+                <span style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);">{{ track.duration|floatformat:0 }}s</span>
+                {% endif %}
+              </div>
+            </div>
+            <div style="flex-shrink:0;">
+              {% if track.status == 'ready' %}
+                <span style="font-size:0.625rem;color:var(--studio-green);font-family:var(--font-mono);">Ready</span>
+              {% elif track.status == 'error' %}
+                <span style="font-size:0.625rem;color:var(--studio-red);font-family:var(--font-mono);">Error</span>
+              {% elif track.status == 'rejected' %}
+                <span style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);">Rejected</span>
+              {% else %}
+                <span style="font-size:0.625rem;color:var(--studio-amber);font-family:var(--font-mono);">{{ track.get_status_display }}</span>
+              {% endif %}
+            </div>
+          </a>
+        {% endfor %}
+      {% else %}
+        <div style="padding:2.5rem 1.25rem;text-align:center;">
+          <p style="font-size:0.8125rem;color:var(--studio-muted);">No tracks yet. Head over to <a href="/backingtracks/" style="color:var(--studio-amber);text-decoration:none;">Backing Tracks</a> to add your first one.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- BPM Distribution -->
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);padding:1.25rem;">
+      <h3 style="font-family:var(--font-display);font-size:0.875rem;font-weight:600;margin-bottom:1rem;">Tempo Distribution</h3>
+      {% if bpm_avg > 0 %}
+      <div style="display:flex;align-items:flex-end;gap:1rem;margin-bottom:1rem;height:96px;">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0.375rem;">
+          <div style="width:100%;background:var(--studio-amber-dim);border-radius:4px 4px 0 0;transition:height 0.3s ease;display:flex;align-items:flex-start;justify-content:center;padding-top:0.375rem;min-height:{% if bpm_slow > 0 %}16px{% else %}0{% endif %};height:{% widthratio bpm_slow bpm_total 96 %}px;" title="Slow (<80 BPM)"></div>
+          <span style="font-size:0.625rem;font-family:var(--font-mono);color:var(--studio-muted);">Slow</span>
+          <span style="font-size:0.625rem;font-family:var(--font-mono);color:var(--studio-text);font-weight:600;">{{ bpm_slow }}</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0.375rem;">
+          <div style="width:100%;background:var(--studio-amber);border-radius:4px 4px 0 0;transition:height 0.3s ease;display:flex;align-items:flex-start;justify-content:center;padding-top:0.375rem;min-height:{% if bpm_medium > 0 %}16px{% else %}0{% endif %};height:{% widthratio bpm_medium bpm_total 96 %}px;" title="Medium (80-120 BPM)"></div>
+          <span style="font-size:0.625rem;font-family:var(--font-mono);color:var(--studio-muted);">Medium</span>
+          <span style="font-size:0.625rem;font-family:var(--font-mono);color:var(--studio-text);font-weight:600;">{{ bpm_medium }}</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0.375rem;">
+          <div style="width:100%;background:var(--studio-orange);border-radius:4px 4px 0 0;transition:height 0.3s ease;display:flex;align-items:flex-start;justify-content:center;padding-top:0.375rem;min-height:{% if bpm_fast > 0 %}16px{% else %}0{% endif %};height:{% widthratio bpm_fast bpm_total 96 %}px;" title="Fast (>120 BPM)"></div>
+          <span style="font-size:0.625rem;font-family:var(--font-mono);color:var(--studio-muted);">Fast</span>
+          <span style="font-size:0.625rem;font-family:var(--font-mono);color:var(--studio-text);font-weight:600;">{{ bpm_fast }}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;padding-top:0.75rem;border-top:1px solid var(--studio-border);">
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);">Average</div>
+          <div style="font-size:0.875rem;font-weight:600;font-family:var(--font-display);">{{ bpm_avg }}</div>
+        </div>
+        {% if bpm_min is not None %}
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);">Lowest</div>
+          <div style="font-size:0.875rem;font-weight:600;font-family:var(--font-display);">{{ bpm_min }}</div>
+        </div>
+        {% endif %}
+        {% if bpm_max is not None %}
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:0.625rem;color:var(--studio-muted);font-family:var(--font-mono);">Highest</div>
+          <div style="font-size:0.875rem;font-weight:600;font-family:var(--font-display);">{{ bpm_max }}</div>
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <p style="font-size:0.75rem;color:var(--studio-muted);font-family:var(--font-mono);">No tempo data yet</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
