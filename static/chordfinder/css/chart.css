@@ -1,0 +1,451 @@
+/* ── Search Page ── */
+.chord-search-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.chord-search-page.has-results {
+  max-width: none;
+}
+
+.chord-search-header {
+  max-width: 640px;
+  margin: 0 auto 1.25rem;
+}
+
+.chord-search-constrain {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.chord-search-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--studio-text);
+  margin: 0;
+}
+
+.chord-search-subtitle {
+  font-size: 0.8125rem;
+  color: var(--studio-muted);
+  margin: 0.125rem 0 0;
+}
+
+.chord-search-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.chord-search-input-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.chord-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--studio-muted);
+  pointer-events: none;
+}
+
+.chord-search-input {
+  width: 100%;
+  padding: 0.625rem 1rem 0.625rem 2.5rem;
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-sm);
+  color: var(--studio-text);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.chord-search-input:focus {
+  border-color: var(--studio-amber);
+  box-shadow: 0 0 0 3px var(--studio-amber-dim);
+}
+
+.chord-search-btn {
+  padding: 0.625rem 1rem;
+  background: var(--studio-amber);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: var(--studio-glow-amber);
+  transition: opacity 0.15s;
+}
+
+.chord-search-btn:hover {
+  opacity: 0.9;
+}
+
+.chord-search-btn.loading {
+  pointer-events: none;
+  opacity: 0.6;
+  position: relative;
+  padding-left: 1.75rem;
+}
+
+.chord-search-btn.loading::before {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  margin-top: -0.375rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: chord-spin 0.6s linear infinite;
+}
+
+@keyframes chord-spin {
+  to { transform: rotate(360deg); }
+}
+
+.chord-error {
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-sm);
+  color: #ef4444;
+  font-size: 0.8125rem;
+  margin-bottom: 1rem;
+}
+
+.chord-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--studio-text);
+  font-size: 0.9375rem;
+}
+
+/* ── Result Cards ── */
+.chord-result-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.375rem;
+  padding: 0.1875rem 0.5rem;
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s;
+  min-height: 1.5rem;
+}
+
+.chord-result-card:hover {
+  border-color: var(--studio-amber-dim);
+  background: rgba(217, 119, 6, 0.03);
+}
+
+.chord-result-title {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--studio-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.chord-recommended-badge {
+  display: inline;
+  font-size: 0.5625rem;
+  color: var(--studio-amber);
+  margin-left: 0.125rem;
+}
+
+.chord-result-meta {
+  color: var(--studio-muted);
+  font-size: 0.5625rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.chord-key-badge {
+  display: inline-block;
+  padding: 0 0.25rem;
+  background: rgba(217, 119, 6, 0.1);
+  border: 1px solid var(--studio-amber-dim);
+  border-radius: 3px;
+  color: var(--studio-amber);
+  font-weight: 600;
+  font-size: 0.5rem;
+  line-height: 1.1rem;
+}
+
+.chord-result-rating {
+  flex-shrink: 0;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  color: var(--studio-amber);
+}
+
+/* ── Artist Columns ── */
+.chord-artist-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  padding: 0.25rem 0 0.75rem;
+}
+
+.chord-artist-col {
+  min-width: 0;
+}
+
+.chord-artist-col-header {
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--studio-amber);
+  padding-bottom: 0.375rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--studio-amber-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chord-artist-col-songs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+}
+
+
+
+
+
+.chord-back-link {
+  display: inline-block;
+  font-size: 0.75rem;
+  color: var(--studio-amber);
+  text-decoration: none;
+}
+
+.chord-back-link:hover {
+  text-decoration: underline;
+}
+
+.studio-content:has(.chord-viewer) {
+  padding: 0.5rem 1rem;
+}
+
+/* ── Chord Viewer ── */
+.chord-viewer {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.chord-viewer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.375rem;
+}
+
+.chord-viewer-meta {
+  min-width: 0;
+}
+
+.chord-viewer-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--studio-text);
+  margin: 0;
+}
+
+.chord-viewer-artist {
+  font-size: 0.75rem;
+  color: var(--studio-muted);
+}
+
+.chord-viewer-header-end {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* ── Toolbar ── */
+.chord-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius);
+  padding: 0.25rem;
+}
+
+.chord-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--studio-muted);
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.chord-toolbar-btn:hover {
+  color: var(--studio-text);
+  background: rgba(255,255,255,0.04);
+}
+
+.chord-toolbar-btn.is-active {
+  color: var(--studio-amber);
+  background: rgba(217, 119, 6, 0.1);
+  font-weight: 600;
+}
+
+.chord-toolbar-btn-icon {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.chord-toolbar-btn-label {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chord-toolbar-btn-sm {
+  padding: 0.25rem 0.375rem;
+  font-size: 0.75rem;
+}
+
+.chord-toolbar-divider {
+  width: 1px;
+  height: 1rem;
+  background: var(--studio-border);
+}
+
+.chord-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.chord-toolbar-label {
+  min-width: 1.25rem;
+  text-align: center;
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--studio-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.chord-toolbar-label-dim {
+  color: var(--studio-muted);
+  font-weight: 400;
+  font-size: 0.5625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-left: 0.125rem;
+}
+
+/* ── Song Map ── */
+.chord-song-map {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.375rem;
+  padding-bottom: 0.375rem;
+  border-bottom: 1px solid var(--studio-border);
+}
+
+.chord-map-section {
+  padding: 0.125rem 0.375rem;
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-border);
+  border-radius: 999px;
+  color: var(--studio-muted);
+  font-family: var(--font-body);
+  font-size: 0.5625rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+/* ── Chart Content ── */
+.chord-scroll-area {
+  columns: 2;
+  column-gap: 1.5rem;
+}
+
+.chord-section {
+  break-inside: avoid;
+  margin-bottom: 0.5rem;
+}
+
+.chord-section-label {
+  font-family: var(--font-display);
+  font-size: 0.625rem;
+  font-weight: 800;
+  color: var(--studio-amber);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.125rem;
+  text-transform: uppercase;
+  padding: 0.125rem 0.375rem;
+  background: rgba(217, 119, 6, 0.08);
+  border-left: 2px solid var(--studio-amber);
+  display: inline-block;
+}
+
+.chord-block {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  margin: 0;
+  white-space: pre;
+  break-inside: avoid;
+}
+
+.chord-block-chords {
+  font-weight: 700;
+  color: var(--studio-amber);
+  letter-spacing: 0;
+}
+
+.chord-block-lyrics {
+  font-weight: 400;
+  color: var(--studio-text);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .chord-scroll-area {
+    columns: 1;
+  }
+
+  .chord-block {
+    font-size: 0.625rem;
+  }
+}
