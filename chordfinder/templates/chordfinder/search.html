@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Chord Charts — MusicPractice{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/chordfinder/css/chart.css">
+{% endblock %}
+
+{% block content %}
+<div class="chord-search-page{% if groups %} has-results{% endif %}">
+  <div class="chord-search-header animate-fade-up">
+    <h1 class="chord-search-title">Chord Charts</h1>
+    <p class="chord-search-subtitle">Search Ultimate Guitar for chords & lyrics</p>
+  </div>
+
+  <div class="chord-search-constrain animate-fade-up delay-2">
+  <form method="get" action="{% url 'chordfinder:search' %}" class="chord-search-form" onsubmit="this.querySelector('.chord-search-btn').classList.add('loading')">
+    <div class="chord-search-input-wrap">
+      <svg class="chord-search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" name="q" value="{{ query }}" placeholder="Search song or artist..." class="chord-search-input" autofocus>
+    </div>
+    <button type="submit" class="chord-search-btn">Search</button>
+  </form>
+  </div>
+
+  {% if error %}
+  <div class="chord-search-constrain animate-fade-up delay-3"><div class="chord-error">{{ error }}</div></div>
+  {% endif %}
+
+  {% if query and not groups %}
+  <div class="chord-search-constrain animate-fade-up delay-3"><div class="chord-empty">
+    <p>No results found for "{{ query }}"</p>
+    <p style="color:var(--studio-muted);font-size:0.875rem;">Try a different spelling or a simpler search</p>
+  </div></div>
+  {% endif %}
+
+  <div class="chord-artist-columns animate-fade-up delay-3">
+  {% for group in groups %}
+  <div class="chord-artist-col">
+    <div class="chord-artist-col-header">{{ group.artist }}</div>
+    <div class="chord-artist-col-songs">
+      {% for r in group.results %}
+      <a href="{% url 'chordfinder:chart' %}?url={{ r.url|urlencode }}" class="chord-result-card animate-fade-up {% cycle 'delay-3' 'delay-4' 'delay-5' 'delay-6' 'delay-7' 'delay-8' %}"{% if r.recommended %} style="border-color:var(--studio-amber);background:rgba(217,119,6,0.04);"{% endif %}>
+        <span class="chord-result-title">
+          {{ r.title }}
+          {% if r.recommended %}<span class="chord-recommended-badge">★</span>{% endif %}
+        </span>
+        <span class="chord-result-meta">
+          {% if r.key %}<span class="chord-key-badge">{{ r.key }}</span>{% endif %}
+          {% if r.votes %}{{ r.votes }} votes{% endif %}
+          {% if r.rating %}<span class="chord-result-rating">{{ r.rating|floatformat:1 }}</span>{% endif %}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}

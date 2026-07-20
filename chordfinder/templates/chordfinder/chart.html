@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ chart.title }} — Chord Charts{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/chordfinder/css/chart.css">
+{% endblock %}
+
+{% block content %}
+<div class="chord-viewer">
+  <div class="chord-viewer-header">
+    <div class="chord-viewer-meta">
+      <h1 class="chord-viewer-title">{{ chart.title }}</h1>
+      <span class="chord-viewer-artist">{{ chart.artist }}</span>
+    </div>
+    <div class="chord-viewer-header-end">
+      <div class="chord-toolbar">
+        <button class="chord-toolbar-btn" id="btn-simplify" onclick="toggleSimplify()" data-active="false">
+          <span class="chord-toolbar-btn-icon">↯</span>
+          <span class="chord-toolbar-btn-label">Simplify</span>
+        </button>
+        <div class="chord-toolbar-divider"></div>
+        <div class="chord-toolbar-group">
+          <button class="chord-toolbar-btn chord-toolbar-btn-sm" onclick="transposeChords(-1)" title="Transpose down">♭</button>
+          <span class="chord-toolbar-label" id="transpose-counter">0</span>
+          <button class="chord-toolbar-btn chord-toolbar-btn-sm" onclick="transposeChords(1)" title="Transpose up">♯</button>
+          <span class="chord-toolbar-label chord-toolbar-label-dim">Key</span>
+        </div>
+      </div>
+      <a href="{% url 'chordfinder:search' %}?q={{ chart.title }}" class="chord-back-link">← Back</a>
+    </div>
+  </div>
+
+  {% if chart.sections|length > 1 %}
+  <div class="chord-song-map">
+    {% for sec in chart.sections %}
+    <span class="chord-map-section" style="cursor:default;">{{ sec.label }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="chord-scroll-area">
+    {% for sec in chart.sections %}
+    <div class="chord-section">
+      {% if chart.sections|length > 1 %}
+      <div class="chord-section-label">{{ sec.label|upper }}</div>
+      {% endif %}
+      {% for row in sec.pairs %}
+<pre class="chord-block"><span class="chord-block-chords" data-orig="{{ row.chords }}" data-simple="{{ row.simplified }}">{{ row.chords }}</span>
+<span class="chord-block-lyrics">{{ row.lyric }}</span></pre>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
+const NOTE_MAP = Object.fromEntries(NOTES.map((n,i)=>[n,i]))
+let currentTranspose = 0
+let simplified = false
+
+function toggleSimplify() {
+  simplified = !simplified
+  const btn = document.getElementById('btn-simplify')
+  btn.dataset.active = simplified
+  btn.classList.toggle('is-active', simplified)
+  document.querySelectorAll('.chord-block-chords').forEach(el => {
+    if (!el.dataset.orig) el.dataset.orig = el.textContent
+    const src = simplified ? el.dataset.simple : el.dataset.orig
+    el.textContent = src
+    el.dataset.transpose = 0
+  })
+  currentTranspose = 0
+  document.getElementById('transpose-counter').textContent = '0'
+}
+
+function transposeChord(chord, semitones) {
+  return chord.replace(/[A-G][#b]?/g, note => {
+    let idx = NOTE_MAP[note]
+    if (idx === undefined && note.length === 2 && note[1] === 'b')
+      idx = (NOTE_MAP[note[0]] - 1 + 12) % 12
+    if (idx === undefined) return note
+    return NOTES[(idx + semitones + 12) % 12]
+  })
+}
+
+function transposeChords(semitones) {
+  currentTranspose += semitones
+  document.getElementById('transpose-counter').textContent = currentTranspose
+  document.querySelectorAll('.chord-block-chords').forEach(el => {
+    const source = simplified ? el.dataset.simple : el.dataset.orig
+    if (!el.dataset.orig) el.dataset.orig = source
+    el.textContent = transposeChord(source, currentTranspose)
+  })
+}
+</script>
+{% endblock %}

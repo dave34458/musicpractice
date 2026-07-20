@@ -3,3 +3,5 @@ yt-dlp
 demucs
 librosa
 ffmpeg-python
+requests
+beautifulsoup4
