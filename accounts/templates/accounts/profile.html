@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% load account_extras %}
+{% block title %}{{ profile.get_display_name }} — Profile{% endblock %}
+
+{% block content %}
+<div class="animate-fade-up" style="max-width:640px;margin:0 auto;padding:1.5rem 1rem 3rem;">
+
+  <!-- Hero -->
+  <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);overflow:hidden;">
+    <div style="height:48px;background:linear-gradient(135deg,rgba(217,119,6,0.12),rgba(217,119,6,0.02));border-bottom:1px solid var(--studio-border);position:relative;">
+      <div style="position:absolute;bottom:-20px;left:1rem;">
+        {% if profile.avatar %}
+        <img src="{{ profile.avatar.url }}" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--studio-panel);">
+        {% else %}
+        <div style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1rem;font-weight:800;background:var(--studio-amber-dim);color:var(--studio-amber);border:2px solid var(--studio-panel);">{{ profile.user.username|first|upper }}</div>
+        {% endif %}
+      </div>
+    </div>
+    <div style="padding:1.75rem 1rem 0.75rem;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div style="min-width:0;">
+          <div style="display:flex;align-items:center;gap:0.375rem;flex-wrap:wrap;">
+            <h1 style="font-family:var(--font-display);font-size:1rem;font-weight:800;margin:0;letter-spacing:-0.01em;">{{ profile.get_display_name }}</h1>
+            <span style="font-size:0.5625rem;color:var(--studio-muted);font-family:var(--font-mono);">@{{ profile.user.username }}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.375rem;margin-top:0.1875rem;flex-wrap:wrap;">
+            <span style="font-size:0.5rem;color:var(--studio-muted);font-family:var(--font-mono);">{{ profile.user.email|default:'—' }}</span>
+            <span style="font-size:0.375rem;color:var(--studio-border);">|</span>
+            <span style="font-size:0.5rem;color:var(--studio-muted);font-family:var(--font-mono);">Joined {{ profile_user.date_joined|date:"M Y" }}</span>
+            <span style="font-size:0.375rem;color:var(--studio-border);">|</span>
+            <span style="font-size:0.5rem;color:var(--studio-muted);font-family:var(--font-mono);">Member{% if profile_age_years %} {{ profile_age_years }}y{% endif %}{% if profile_age_months %} {{ profile_age_months }}m{% endif %}</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.25rem;flex-shrink:0;">
+          <span style="display:inline-flex;align-items:center;gap:0.1875rem;padding:0.125rem 0.375rem;border-radius:999px;font-size:0.5rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;font-family:var(--font-mono);background:{% if profile.skill_level == 'advanced' %}rgba(217,119,6,0.12){% elif profile.skill_level == 'intermediate' %}rgba(217,119,6,0.08){% else %}transparent{% endif %};border:1px solid {% if profile.skill_level == 'advanced' %}rgba(217,119,6,0.2){% elif profile.skill_level == 'intermediate' %}rgba(217,119,6,0.12){% else %}var(--studio-border){% endif %};color:{% if profile.skill_level == 'beginner' %}var(--studio-muted){% else %}var(--studio-amber){% endif %};">
+            {% if profile.skill_level != 'beginner' %}<span style="width:3px;height:3px;border-radius:50%;background:var(--studio-amber);box-shadow:0 0 4px rgba(217,119,6,0.4);"></span>{% endif %}
+            {{ profile.get_skill_level_display }}
+          </span>
+        </div>
+      </div>
+      {% if profile.bio %}
+      <p style="font-size:0.625rem;color:var(--studio-muted);margin:0.375rem 0 0;line-height:1.5;">{{ profile.bio }}</p>
+      {% endif %}
+      {% if profile.website %}
+      <a href="{{ profile.website }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.1875rem;margin-top:0.25rem;font-size:0.5625rem;color:var(--studio-amber);text-decoration:none;">
+        {{ profile.website }}
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Stat bar -->
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0.3125rem;margin-top:0.5rem;">
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-sm);padding:0.3125rem;text-align:center;">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--studio-text);font-family:var(--font-mono);">{{ track_count }}</div>
+      <div style="font-size:0.4375rem;color:var(--studio-muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.04em;">Tracks</div>
+    </div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-sm);padding:0.3125rem;text-align:center;">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--studio-green);font-family:var(--font-mono);">{{ ready_pct }}%</div>
+      <div style="font-size:0.4375rem;color:var(--studio-muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.04em;">Ready</div>
+    </div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-sm);padding:0.3125rem;text-align:center;">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--studio-amber);font-family:var(--font-mono);">{{ bpm_avg|floatformat:0|default:'—' }}</div>
+      <div style="font-size:0.4375rem;color:var(--studio-muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.04em;">Ø BPM</div>
+    </div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-sm);padding:0.3125rem;text-align:center;">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--studio-text);font-family:var(--font-mono);">{{ duration_total|floatformat:1|default:'0' }}h</div>
+      <div style="font-size:0.4375rem;color:var(--studio-muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.04em;">Hours</div>
+    </div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-sm);padding:0.3125rem;text-align:center;">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--studio-text);font-family:var(--font-mono);">{{ stems_total }}</div>
+      <div style="font-size:0.4375rem;color:var(--studio-muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.04em;">Stems</div>
+    </div>
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-sm);padding:0.3125rem;text-align:center;">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--studio-text);font-family:var(--font-mono);">{{ playlist_count }}</div>
+      <div style="font-size:0.4375rem;color:var(--studio-muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.04em;">Playlists</div>
+    </div>
+  </div>
+
+  <!-- Instruments + Genres -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;">
+    {% with instruments=profile.instruments.all %}
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);padding:0.5rem;">
+      <div style="font-size:0.5rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;color:var(--studio-muted);font-family:var(--font-mono);margin-bottom:0.25rem;">Instruments <span style="color:var(--studio-amber);">{{ instruments|length }}</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.1875rem;">
+        {% for inst in instruments %}
+        <span style="padding:0.125rem 0.3125rem;border-radius:999px;font-size:0.5625rem;font-family:var(--font-mono);background:rgba(217,119,6,0.08);color:var(--studio-amber);border:1px solid rgba(217,119,6,0.15);">{{ inst.name }}</span>
+        {% empty %}
+        <span style="font-size:0.5625rem;color:var(--studio-muted);font-family:var(--font-mono);">—</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endwith %}
+    {% with genres=profile.genres.all %}
+    <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);padding:0.5rem;">
+      <div style="font-size:0.5rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;color:var(--studio-muted);font-family:var(--font-mono);margin-bottom:0.25rem;">Genres <span style="color:var(--studio-amber);">{{ genres|length }}</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.1875rem;">
+        {% for g in genres %}
+        <span style="padding:0.125rem 0.3125rem;border-radius:999px;font-size:0.5625rem;font-family:var(--font-mono);background:rgba(217,119,6,0.08);color:var(--studio-amber);border:1px solid rgba(217,119,6,0.15);">{{ g.name }}</span>
+        {% empty %}
+        <span style="font-size:0.5625rem;color:var(--studio-muted);font-family:var(--font-mono);">—</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endwith %}
+  </div>
+
+  <!-- Analytics -->
+  {% if track_count %}
+  <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);padding:0.625rem;margin-top:0.5rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.375rem;">
+      <div style="font-size:0.5rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;color:var(--studio-muted);font-family:var(--font-mono);">Status</div>
+      <div style="display:flex;gap:0.5rem;font-size:0.5rem;font-family:var(--font-mono);">
+        <span style="color:var(--studio-green);">R{{ status_counts.ready }}</span>
+        {% if status_counts.processing %}<span style="color:var(--studio-amber);">P{{ status_counts.processing }}</span>{% endif %}
+        {% if status_counts.queued %}<span style="color:var(--studio-muted);">Q{{ status_counts.queued }}</span>{% endif %}
+        {% if status_counts.error %}<span style="color:#ef4444;">E{{ status_counts.error }}</span>{% endif %}
+        {% if status_counts.rejected %}<span style="color:#6b7280;">X{{ status_counts.rejected }}</span>{% endif %}
+      </div>
+    </div>
+    <div style="height:3px;background:var(--studio-border);border-radius:2px;overflow:hidden;margin-bottom:0.375rem;display:flex;">
+      {% if status_counts.ready %}<div style="height:100%;background:var(--studio-green);width:{% widthratio status_counts.ready track_count 100 %}%;"></div>{% endif %}
+      {% if status_counts.processing %}<div style="height:100%;background:var(--studio-amber);width:{% widthratio status_counts.processing track_count 100 %}%;"></div>{% endif %}
+      {% if status_counts.queued %}<div style="height:100%;background:var(--studio-border);width:{% widthratio status_counts.queued track_count 100 %}%;"></div>{% endif %}
+      {% if status_counts.error %}<div style="height:100%;background:#ef4444;width:{% widthratio status_counts.error track_count 100 %}%;"></div>{% endif %}
+      {% if status_counts.rejected %}<div style="height:100%;background:#6b7280;width:{% widthratio status_counts.rejected track_count 100 %}%;"></div>{% endif %}
+    </div>
+    <div style="display:flex;gap:0.75rem;font-size:0.5625rem;font-family:var(--font-mono);color:var(--studio-muted);flex-wrap:wrap;">
+      {% if bpm_min %}<span>BPM <span style="color:var(--studio-amber);">{{ bpm_min|floatformat:0 }}</span>–<span style="color:var(--studio-amber);">{{ bpm_max|floatformat:0 }}</span> <span style="color:var(--studio-muted);">(avg {{ bpm_avg|floatformat:0 }})</span></span>{% endif %}
+      {% if top_key %}<span>Key <span style="color:var(--studio-amber);">{{ top_key }}</span></span>{% endif %}
+      {% if tracks_with_stems %}<span>Stems on <span style="color:var(--studio-amber);">{{ tracks_with_stems }}</span>/{{ track_count }} tracks</span>{% endif %}
+      {% if duration_total %}<span>{{ duration_total|floatformat:1 }}h total</span>{% endif %}
+    </div>
+    {% if genre_dist %}
+    <div style="margin-top:0.5rem;padding-top:0.5rem;border-top:1px solid var(--studio-border);">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.1875rem;">
+        {% for g in genre_dist %}
+        <div style="display:flex;align-items:center;gap:0.3125rem;">
+          <span style="font-size:0.5625rem;font-family:var(--font-mono);color:var(--studio-text);min-width:3rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ g.name }}</span>
+          <div style="flex:1;height:3px;background:var(--studio-border);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;background:var(--studio-amber);width:{{ g.count|percentage:track_count }}%;border-radius:2px;"></div>
+          </div>
+          <span style="font-size:0.4375rem;font-family:var(--font-mono);color:var(--studio-muted);min-width:1rem;text-align:right;">{{ g.count }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% if track_oldest %}
+    <div style="margin-top:0.375rem;padding-top:0.375rem;border-top:1px solid var(--studio-border);display:flex;gap:1rem;font-size:0.5rem;font-family:var(--font-mono);color:var(--studio-muted);">
+      <span>First track {{ track_oldest|date:"M Y" }}</span>
+      <span>Latest {{ track_newest|date:"M Y" }}</span>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- All Tracks -->
+  {% if all_tracks %}
+  <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);overflow:hidden;margin-top:0.5rem;">
+    <div style="padding:0.375rem 0.5rem;border-bottom:1px solid var(--studio-border);display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:0.5rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;color:var(--studio-muted);font-family:var(--font-mono);">Tracks <span style="color:var(--studio-amber);">{{ track_count }}</span></span>
+      <a href="{% url 'backingtracks' %}" style="font-size:0.5rem;color:var(--studio-amber);text-decoration:none;font-family:var(--font-mono);">All</a>
+    </div>
+    <div>
+      {% for t in all_tracks %}
+      <a href="{% url 'track_player' t.id %}" style="display:grid;grid-template-columns:1.125rem 1fr 2rem 1.75rem 2.25rem 1.75rem 0.75rem auto;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;text-decoration:none;border-bottom:1px solid var(--studio-border);transition:background 0.1s;{% if forloop.last %}border-bottom:none;{% endif %}" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background=''">
+        <div style="width:18px;height:18px;border-radius:2px;background:var(--studio-surface);display:flex;align-items:center;justify-content:center;font-size:0.5rem;color:var(--studio-dim);">{{ t.title|default:'♪'|first|upper }}</div>
+        <div style="overflow:hidden;">
+          <div style="font-size:0.5625rem;color:var(--studio-text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ t.title|default:t.youtube_url|truncatechars:25 }}</div>
+          {% if t.artist %}<div style="font-size:0.4375rem;color:var(--studio-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ t.artist|truncatechars:20 }}</div>{% endif %}
+        </div>
+        <div style="font-size:0.5rem;font-family:var(--font-mono);color:var(--studio-amber);text-align:right;">{{ t.bpm|floatformat:0|default:'—' }}</div>
+        <div style="font-size:0.5rem;font-family:var(--font-mono);color:var(--studio-text);text-align:center;">{{ t.key|default:'—' }}</div>
+        <div style="font-size:0.5rem;font-family:var(--font-mono);color:var(--studio-muted);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ t.genre.name|default:'—' }}</div>
+        <div style="font-size:0.5rem;font-family:var(--font-mono);color:var(--studio-muted);text-align:center;">{{ t.duration|duration_display }}</div>
+        <div style="font-size:0.4375rem;font-family:var(--font-mono);color:var(--studio-muted);text-align:center;">{{ t.stems_count|default:'—' }}</div>
+        <div>
+          {% if t.status == 'ready' %}
+          <span style="display:inline-flex;align-items:center;gap:0.125rem;padding:0.0625rem 0.25rem;border-radius:999px;font-size:0.4375rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;font-family:var(--font-mono);background:rgba(34,197,94,0.1);color:var(--studio-green);border:1px solid rgba(34,197,94,0.2);line-height:1.2;">
+            <span style="width:2px;height:2px;border-radius:50%;background:var(--studio-green);box-shadow:0 0 3px rgba(34,197,94,0.3);"></span>
+            R
+          </span>
+          {% elif t.status == 'error' %}
+          <span style="font-size:0.4375rem;color:#ef4444;font-family:var(--font-mono);font-weight:600;">E</span>
+          {% elif t.status == 'rejected' %}
+          <span style="font-size:0.4375rem;color:#6b7280;font-family:var(--font-mono);">X</span>
+          {% else %}
+          <span style="font-size:0.4375rem;color:var(--studio-amber);font-family:var(--font-mono);">{{ t.status|first|upper }}</span>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- All Playlists -->
+  {% if all_playlists %}
+  <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);overflow:hidden;margin-top:0.5rem;">
+    <div style="padding:0.375rem 0.5rem;border-bottom:1px solid var(--studio-border);display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:0.5rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;color:var(--studio-muted);font-family:var(--font-mono);">Playlists <span style="color:var(--studio-amber);">{{ playlist_count }}</span></span>
+      <a href="{% url 'playlists' %}" style="font-size:0.5rem;color:var(--studio-amber);text-decoration:none;font-family:var(--font-mono);">All</a>
+    </div>
+    <div style="padding:0.1875rem;">
+      {% for p in all_playlists %}
+      <a href="{% url 'playlist_detail' p.id %}" style="display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:0.375rem;padding:0.25rem 0.3125rem;border-radius:2px;text-decoration:none;transition:background 0.1s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background=''">
+        <div style="width:20px;height:20px;border-radius:2px;background:var(--studio-surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.5rem;color:var(--studio-dim);">{{ p.name|first|upper }}</div>
+        <div style="overflow:hidden;">
+          <div style="font-size:0.5625rem;color:var(--studio-text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ p.name }}</div>
+          {% if p.description %}<div style="font-size:0.4375rem;color:var(--studio-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ p.description|truncatechars:40 }}</div>{% endif %}
+        </div>
+        <div style="display:flex;align-items:center;gap:0.375rem;">
+          <span style="font-size:0.4375rem;color:var(--studio-muted);font-family:var(--font-mono);">{{ p.tracks_count }} trk</span>
+          <span style="font-size:0.4375rem;color:var(--studio-muted);font-family:var(--font-mono);">{{ p.created_at|date:"M y" }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Actions -->
+  {% if is_owner %}
+  <div style="display:flex;gap:0.3125rem;margin-top:0.5rem;">
+    <a href="{% url 'profile_edit' %}" style="flex:2;display:inline-flex;align-items:center;justify-content:center;gap:0.3125rem;padding:0.375rem 0.5rem;border-radius:var(--radius-sm);font-size:0.5625rem;font-weight:600;background:var(--studio-amber);color:#fff;text-decoration:none;box-shadow:var(--studio-glow-amber);transition:opacity 0.12s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Edit</a>
+    <a href="{% url 'password_change' %}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:0.3125rem;padding:0.375rem 0.5rem;border-radius:var(--radius-sm);font-size:0.5625rem;font-weight:600;background:transparent;color:var(--studio-muted);border:1px solid var(--studio-border);text-decoration:none;transition:all 0.12s;" onmouseover="this.style.borderColor='var(--studio-amber)';this.style.color='var(--studio-amber)'" onmouseout="this.style.borderColor='var(--studio-border)';this.style.color='var(--studio-muted)'">Password</a>
+    <a href="{% url 'profile_delete' %}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:0.3125rem;padding:0.375rem 0.5rem;border-radius:var(--radius-sm);font-size:0.5625rem;font-weight:600;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);text-decoration:none;transition:all 0.12s;" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='rgba(239,68,68,0.1)'">Delete</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

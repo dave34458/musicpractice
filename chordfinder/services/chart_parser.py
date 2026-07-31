@@ -111,7 +111,8 @@ def extract_chord_line(line):
     chord_line = ''.join(chars).rstrip()
 
     lyric_text = re.sub(r'\[ch\].*?\[/ch\]', '', raw).rstrip()
-    if lyric_text.strip():
+    lyric_text = re.sub(r'\[/?tab\]', '', lyric_text).strip()
+    if lyric_text:
         return chord_line, lyric_text
 
     return chord_line, ''
@@ -135,16 +136,19 @@ def snap_chords_to_words(chord_line, lyric_line):
         chords = [(chords[0][0], chords[0][1])] + [(name, max(0, pos - lead)) for name, pos in chords[1:]]
 
     new_chord = [' '] * (len(lyric_line) + max(len(c[0]) for c in chords))
+    prev_end = 0
     for chord, cpos in chords:
         wpos = min(words, key=lambda w: abs(cpos - w[1]))[1]
+        if wpos <= prev_end:
+            wpos = prev_end + 1
         for j, c in enumerate(chord):
             if wpos + j < len(new_chord):
                 new_chord[wpos + j] = c
+        prev_end = wpos + len(chord)
     return ''.join(new_chord).rstrip()
 
 
-def simplify_chord(name):
-    name = name.split('/')[0]
+def simplify_one(name):
     m = re.match(r'^([A-G][#b]?)(m(?!a|j))?', name)
     if not m:
         m = re.match(r'^([A-G][#b]?)', name)
@@ -168,6 +172,10 @@ def simplify_chord(name):
             return root + '7'
 
     return root + quality
+
+
+def simplify_chord(name):
+    return '/'.join(simplify_one(p) for p in name.split('/'))
 
 
 def simplify_chord_line(chord_line):

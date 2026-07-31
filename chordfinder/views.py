@@ -1,49 +1,78 @@
+import json
 from collections import defaultdict
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from .services.ug_scraper import search_songs, fetch_chart
 from .services.chart_parser import parse_chart, snap_chords_to_words, simplify_chord_line
 from .services.chart_ranker import score_result
 
 
+def _search_groups(query):
+    results = search_songs(query)
+    results = [r for r in results if r.get('type', '').lower() == 'chords']
+    scored = [(score_result(r), r) for r in results]
+    scored.sort(key=lambda x: -x[0])
+
+    by_artist = defaultdict(list)
+    for score, r in scored:
+        r['rank_score'] = score
+        by_artist[r['artist'] or 'Unknown'].append(r)
+
+    groups = []
+    for artist in by_artist:
+        artist_results = by_artist[artist]
+        artist_results.sort(key=lambda x: (-x['rank_score'], x['title'].lower()))
+        total_votes = sum(r.get('votes', 0) or 0 for r in artist_results)
+
+        seen = set()
+        for r in artist_results:
+            key = (r['title'].lower(), r['artist'].lower())
+            r['recommended'] = key not in seen
+            seen.add(key)
+
+        groups.append({
+            'artist': artist,
+            'results': artist_results,
+            'total_votes': total_votes,
+        })
+
+    groups.sort(key=lambda g: -g['total_votes'])
+    return groups
+
+
 @login_required
 def search(request):
     query = request.GET.get('q', '')
-    groups = []
-    if query:
-        results = search_songs(query)
-        results = [r for r in results if r.get('type', '').lower() == 'chords']
-        scored = [(score_result(r), r) for r in results]
-        scored.sort(key=lambda x: -x[0])
-
-        by_artist = defaultdict(list)
-        for score, r in scored:
-            r['rank_score'] = score
-            by_artist[r['artist'] or 'Unknown'].append(r)
-
-        for artist in by_artist:
-            artist_results = by_artist[artist]
-            artist_results.sort(key=lambda x: (-x['rank_score'], x['title'].lower()))
-            total_votes = sum(r.get('votes', 0) or 0 for r in artist_results)
-
-            seen = set()
-            for r in artist_results:
-                key = (r['title'].lower(), r['artist'].lower())
-                r['recommended'] = key not in seen
-                seen.add(key)
-
-            groups.append({
-                'artist': artist,
-                'results': artist_results,
-                'total_votes': total_votes,
-            })
-
-        groups.sort(key=lambda g: -g['total_votes'])
-
+    groups = _search_groups(query) if query else []
     return render(request, 'chordfinder/search.html', {
         'query': query,
         'groups': groups,
+        'groups_json': json.dumps(groups) if groups else '[]',
     })
+
+
+@login_required
+def search_json(request):
+    query = request.GET.get('q', '').strip()
+    if len(query) < 1:
+        return JsonResponse({'groups': []})
+    groups = _search_groups(query)
+    safe = []
+    for g in groups:
+        safe.append({
+            'artist': g['artist'],
+            'total_votes': g['total_votes'],
+            'results': [{
+                'title': r['title'],
+                'url': r.get('url', ''),
+                'key': r.get('key', ''),
+                'votes': r.get('votes', 0),
+                'rating': r.get('rating', 0),
+                'recommended': r.get('recommended', False),
+            } for r in g['results']],
+        })
+    return JsonResponse({'groups': safe})
 
 
 @login_required
@@ -88,4 +117,6 @@ def chart_view(request):
 
     return render(request, 'chordfinder/chart.html', {
         'chart': chart,
+        'applicature_json': json.dumps(raw.get('applicature', {})),
+        'meta': raw.get('meta', {}),
     })

@@ -74,6 +74,8 @@ def fetch_chart(tab_url):
     artist = artist.get_text(strip=True) if artist else ''
 
     raw_chart = ''
+    applicature = {}
+    meta = {}
     store = _extract_store_data(resp.text)
     if store:
         page_data = store.get('store', {}).get('page', {}).get('data', {})
@@ -81,11 +83,16 @@ def fetch_chart(tab_url):
         title = tab.get('song_name', '')
         artist = tab.get('artist_name', '')
         tab_view = page_data.get('tab_view', {})
-        wiki_tab = tab_view.get('wiki_tab', {})
-        if isinstance(wiki_tab, dict):
-            raw_chart = wiki_tab.get('content', '')
-        elif isinstance(wiki_tab, str):
-            raw_chart = wiki_tab
+        if isinstance(tab_view, dict):
+            wiki_tab = tab_view.get('wiki_tab', {})
+            if isinstance(wiki_tab, dict):
+                raw_chart = wiki_tab.get('content', '')
+            elif isinstance(wiki_tab, str):
+                raw_chart = wiki_tab
+            raw_app = tab_view.get('applicature')
+            if isinstance(raw_app, dict):
+                applicature = raw_app
+            meta = tab_view.get('meta', {})
 
     if not raw_chart:
         pre = soup.select_one('pre')
@@ -107,4 +114,6 @@ def fetch_chart(tab_url):
         'artist': artist,
         'raw_chart': raw_chart.strip(),
         'source_url': tab_url,
+        'applicature': applicature,
+        'meta': meta,
     }

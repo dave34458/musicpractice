@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class BackingTrack(models.Model):
     STATUS_CHOICES = [
         ('queued', 'Queued'),
@@ -19,6 +20,7 @@ class BackingTrack(models.Model):
     key = models.CharField(max_length=20, blank=True, default='')
     duration = models.FloatField(null=True, blank=True)
     image = models.ImageField(upload_to='track_images/', null=True, blank=True)
+    genre = models.ForeignKey('accounts.Genre', on_delete=models.SET_NULL, null=True, blank=True, related_name='backingtracks')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='queued')
     created_at = models.DateTimeField(auto_now_add=True)
 

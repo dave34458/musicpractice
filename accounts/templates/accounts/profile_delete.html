@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Delete Account{% endblock %}
+
+{% block content %}
+<div class="animate-fade-up" style="max-width:480px;margin:1.5rem auto;padding:0 1rem;">
+  <div style="background:var(--studio-panel);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius-lg);padding:1.5rem;">
+    <h1 style="font-family:var(--font-display);font-size:1rem;font-weight:700;margin:0 0 0.75rem;">Delete Account</h1>
+    <p style="font-size:0.8125rem;color:var(--studio-muted);margin:0 0 0.75rem;">This will permanently delete your account and all associated data:</p>
+    <ul style="font-size:0.75rem;color:var(--studio-text);margin:0 0 0.75rem;padding-left:1.25rem;">
+      <li style="margin-bottom:0.25rem;">Profile and settings</li>
+      {% if track_count %}
+      <li style="margin-bottom:0.25rem;"><strong>{{ track_count }}</strong> backing track{{ track_count|pluralize }}</li>
+      {% endif %}
+      {% if playlist_count %}
+      <li style="margin-bottom:0.25rem;"><strong>{{ playlist_count }}</strong> playlist{{ playlist_count|pluralize }}</li>
+      {% endif %}
+    </ul>
+    <p style="font-size:0.75rem;font-weight:600;color:#ef4444;margin:0 0 1rem;">This action cannot be undone.</p>
+    <form method="post">
+      {% csrf_token %}
+      <div style="margin-bottom:0.75rem;">
+        <label style="display:block;font-size:0.6875rem;font-weight:600;color:var(--studio-muted);margin-bottom:0.25rem;text-transform:uppercase;letter-spacing:0.04em;font-family:var(--font-mono);">Type <strong>DELETE</strong> to confirm:</label>
+        <input type="text" name="confirm" placeholder="Type DELETE to confirm" style="width:100%;padding:0.5rem 0.625rem;background:var(--studio-surface);border:1px solid var(--studio-border);border-radius:var(--radius-sm);color:var(--studio-text);font-family:var(--font-body);font-size:0.8125rem;outline:none;box-sizing:border-box;">
+        {% if form.confirm.errors %}<div style="font-size:0.6875rem;color:#ef4444;margin-top:0.125rem;">{{ form.confirm.errors }}</div>{% endif %}
+      </div>
+      <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+        <button type="submit" style="padding:0.5rem 1rem;border-radius:var(--radius-sm);font-size:0.75rem;font-weight:600;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);cursor:pointer;">Delete My Account</button>
+        <a href="{% url 'profile' %}" style="padding:0.5rem 1rem;border-radius:var(--radius-sm);font-size:0.75rem;font-weight:600;background:transparent;color:var(--studio-muted);border:1px solid var(--studio-border);text-decoration:none;">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

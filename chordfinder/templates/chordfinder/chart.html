@@ -6,7 +6,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="chord-viewer">
+<div class="chord-viewer" x-data="chartApp(APPLICATURE)" @click.away="closeTip()">
+
   <div class="chord-viewer-header">
     <div class="chord-viewer-meta">
       <h1 class="chord-viewer-title">{{ chart.title }}</h1>
@@ -14,15 +15,15 @@
     </div>
     <div class="chord-viewer-header-end">
       <div class="chord-toolbar">
-        <button class="chord-toolbar-btn" id="btn-simplify" onclick="toggleSimplify()" data-active="false">
+        <button class="chord-toolbar-btn" @click="toggleSimplify()" :data-active="simplified" :class="simplified ? 'is-active' : ''">
           <span class="chord-toolbar-btn-icon">↯</span>
           <span class="chord-toolbar-btn-label">Simplify</span>
         </button>
         <div class="chord-toolbar-divider"></div>
         <div class="chord-toolbar-group">
-          <button class="chord-toolbar-btn chord-toolbar-btn-sm" onclick="transposeChords(-1)" title="Transpose down">♭</button>
-          <span class="chord-toolbar-label" id="transpose-counter">0</span>
-          <button class="chord-toolbar-btn chord-toolbar-btn-sm" onclick="transposeChords(1)" title="Transpose up">♯</button>
+          <button class="chord-toolbar-btn chord-toolbar-btn-sm" @click="trans(-1)" title="Transpose down">♭</button>
+          <span class="chord-toolbar-label" x-text="transpose">0</span>
+          <button class="chord-toolbar-btn chord-toolbar-btn-sm" @click="trans(1)" title="Transpose up">♯</button>
           <span class="chord-toolbar-label chord-toolbar-label-dim">Key</span>
         </div>
       </div>
@@ -30,20 +31,9 @@
     </div>
   </div>
 
-  {% if chart.sections|length > 1 %}
-  <div class="chord-song-map">
-    {% for sec in chart.sections %}
-    <span class="chord-map-section" style="cursor:default;">{{ sec.label }}</span>
-    {% endfor %}
-  </div>
-  {% endif %}
-
-  <div class="chord-scroll-area">
+  <div class="chord-scroll-area" @click="onAreaClick($event)">
     {% for sec in chart.sections %}
     <div class="chord-section">
-      {% if chart.sections|length > 1 %}
-      <div class="chord-section-label">{{ sec.label|upper }}</div>
-      {% endif %}
       {% for row in sec.pairs %}
 <pre class="chord-block"><span class="chord-block-chords" data-orig="{{ row.chords }}" data-simple="{{ row.simplified }}">{{ row.chords }}</span>
 <span class="chord-block-lyrics">{{ row.lyric }}</span></pre>
@@ -51,47 +41,54 @@
     </div>
     {% endfor %}
   </div>
+
+  <div id="chord-tip" class="chord-hover-tip" @click="onTipClick($event)"></div>
 </div>
 
-<script>
-const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
-const NOTE_MAP = Object.fromEntries(NOTES.map((n,i)=>[n,i]))
-let currentTranspose = 0
-let simplified = false
-
-function toggleSimplify() {
-  simplified = !simplified
-  const btn = document.getElementById('btn-simplify')
-  btn.dataset.active = simplified
-  btn.classList.toggle('is-active', simplified)
-  document.querySelectorAll('.chord-block-chords').forEach(el => {
-    if (!el.dataset.orig) el.dataset.orig = el.textContent
-    const src = simplified ? el.dataset.simple : el.dataset.orig
-    el.textContent = src
-    el.dataset.transpose = 0
-  })
-  currentTranspose = 0
-  document.getElementById('transpose-counter').textContent = '0'
+<style>
+.chord-hover-tip {
+  position:absolute;z-index:100;pointer-events:none;
+  background:var(--studio-panel);border:1px solid var(--studio-border);
+  border-radius:var(--radius-sm);padding:0.75rem;
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  opacity:0;transition:opacity 0.1s;min-width:200px;
 }
-
-function transposeChord(chord, semitones) {
-  return chord.replace(/[A-G][#b]?/g, note => {
-    let idx = NOTE_MAP[note]
-    if (idx === undefined && note.length === 2 && note[1] === 'b')
-      idx = (NOTE_MAP[note[0]] - 1 + 12) % 12
-    if (idx === undefined) return note
-    return NOTES[(idx + semitones + 12) % 12]
-  })
+.chord-hover-tip.show { opacity:1;pointer-events:auto; }
+.chord-hover-tip svg { display:block;width:184px;height:260px; }
+.chord-hover-tip-label {
+  display:flex;align-items:center;justify-content:center;gap:0.5rem;
+  font-size:0.875rem;font-family:var(--font-mono);
+  color:var(--studio-amber);font-weight:700;margin-bottom:0.375rem;
 }
-
-function transposeChords(semitones) {
-  currentTranspose += semitones
-  document.getElementById('transpose-counter').textContent = currentTranspose
-  document.querySelectorAll('.chord-block-chords').forEach(el => {
-    const source = simplified ? el.dataset.simple : el.dataset.orig
-    if (!el.dataset.orig) el.dataset.orig = source
-    el.textContent = transposeChord(source, currentTranspose)
-  })
+.chord-play-btn {
+  background:none;border:1px solid var(--studio-border);border-radius:var(--radius-sm);
+  color:var(--studio-amber);cursor:pointer;font-size:0.625rem;line-height:1;
+  padding:0.15rem 0.35rem;transition:border-color 0.1s,color 0.1s;
 }
-</script>
+.chord-play-btn:hover { border-color:var(--studio-amber); }
+.chord-hover-tip-none {
+  text-align:center;font-size:0.75rem;font-family:var(--font-mono);
+  color:var(--studio-muted);padding:0.5rem 0;
+}
+.chord-name-wrap { cursor:pointer;border-bottom:1px dotted transparent; }
+.chord-name-wrap:hover { color:var(--studio-amber);border-bottom-color:rgba(217,119,6,0.3); }
+.chord-voicing-dot { text-align:center;margin-top:0.25rem;display:flex;justify-content:center;gap:0.375rem; }
+.chord-voicing-dot span { display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--studio-amber);cursor:pointer;opacity:0.25;transition:opacity 0.1s; }
+.chord-voicing-dot span.active { opacity:1; }
+.chord-voicing-dot span:hover { opacity:0.6; }
+.chord-voicing-nav {
+  display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-top:0.5rem;
+}
+.chord-voicing-btn {
+  background:none;border:1px solid var(--studio-border);border-radius:var(--radius-sm);
+  color:var(--studio-text);cursor:pointer;font-size:0.625rem;line-height:1;padding:0.25rem 0.5rem;
+}
+.chord-voicing-btn:hover { border-color:var(--studio-amber);color:var(--studio-amber); }
+.chord-voicing-count {
+  font-size:0.6875rem;font-family:var(--font-mono);color:var(--studio-muted);min-width:2rem;text-align:center;
+}
+</style>
+
+<script>const APPLICATURE = {{ applicature_json|safe }};</script>
+<script src="/static/chordfinder/js/chart.js?v=8"></script>
 {% endblock %}

@@ -91,6 +91,70 @@ body::after {
   flex-shrink: 0;
 }
 
+/* ── Nav Avatar Dropdown ── */
+.studio-nav-avatar-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 2px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.studio-nav-avatar-btn:hover,
+.studio-nav-avatar-btn.active {
+  background: rgba(255,255,255,0.04);
+}
+
+.studio-nav-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  width: 180px;
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  padding: 0.375rem;
+  z-index: 50;
+}
+
+.studio-nav-auth {
+  position: relative;
+}
+
+.studio-nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4375rem 0.625rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--studio-muted);
+  text-decoration: none;
+  transition: all 0.12s;
+}
+
+.studio-nav-dropdown-item:hover {
+  background: rgba(255,255,255,0.04);
+  color: var(--studio-text);
+}
+
+.studio-nav-dropdown-item svg {
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.studio-nav-dropdown-divider {
+  height: 1px;
+  background: var(--studio-border);
+  margin: 0.25rem 0.5rem;
+}
+
 .studio-nav-links {
   position: absolute;
   left: 50%;
