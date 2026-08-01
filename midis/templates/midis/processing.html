@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block title %}Generating MIDI — MusicPractice{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/midis/css/style.css">
+<script src="/static/midis/js/piano-roll.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="midis-page" x-data="live()" x-init="start()">
+  <div class="studio-header">
+    <div>
+      <div class="live-status-row">
+        <h1>{{ midi.title|default:midi.audio.name }}</h1>
+        <span class="status-badge status-processing" x-show="status === 'processing'">generating</span>
+        <span class="status-badge status-queued" x-show="status === 'queued'">queued</span>
+        <span class="status-badge status-error" x-show="status === 'error'">error</span>
+      </div>
+      <p class="midis-sub">The piano roll fills in as the model decodes each 5-second chunk. Hit play to hear what's been generated so far.</p>
+    </div>
+  </div>
+
+  <div class="progress-strip">
+    <div class="progress-strip-fill" :style="'width:' + pct + '%'"></div>
+  </div>
+  <div class="live-meta" style="margin-top:0.5rem;" x-show="status !== 'error'">
+    <span x-text="progress + ' / ' + total + ' chunks'"></span>
+    <span x-show="noteCount"> · </span>
+    <span x-show="noteCount" x-text="noteCount + ' notes'"></span>
+  </div>
+
+  <div class="midis-error" x-show="status === 'error'">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span x-text="error"></span>
+  </div>
+
+  <div class="piano-roll-wrap">
+    <canvas id="piano-roll" class="live"></canvas>
+  </div>
+
+  <div class="transport-bar">
+    <button class="btn-play" @click="togglePlay()" :disabled="!ready || status === 'error'">
+      <svg x-show="!playing" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <svg x-show="playing" x-cloak xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+    </button>
+    <div class="transport-time"><b x-text="fmtTime(pos)"></b> / <span x-text="fmtTime(dur)"></span></div>
+    <div class="transport-seek">
+      <div class="progress-strip" @click="seek($event)">
+        <div class="progress-strip-fill" :style="'width:' + Math.min(pos / (dur || 1) * 100, 100) + '%'"></div>
+      </div>
+    </div>
+    <label class="vol-control" title="MIDI volume">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+      <input type="range" min="0" max="6" step="0.1" x-model.number="vol" @input="player && player.setVolume(vol)">
+    </label>
+    <span class="live-meta" x-show="!ready">preparing audio engine…</span>
+  </div>
+</div>
+
+<script>
+// Classic (parser-blocking) script: window.live must exist before Alpine's
+// deferred script starts on a microtask. MidiPlayer is loaded lazily below.
+const NOTES_URL = "{% url 'midis:notes' midi.id %}";
+const STATUS_URL = "{% url 'midis:status' midi.id %}";
+const DETAIL_URL = "{% url 'midis:detail' midi.id %}";
+
+function fmt(t) {
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+window.live = function () {
+  return {
+    status: 'queued',
+    progress: 0,
+    total: 0,
+    noteCount: 0,
+    error: '',
+    notes: [],
+    player: null,
+    ready: false,
+    playing: false,
+    pos: 0,
+    dur: 0,
+    vol: 3.5,
+    lastCount: -1,
+    lastUi: 0,
+    lastDraw: 0,
+    pct() {
+      return this.total ? Math.min(this.progress / this.total * 100, 100) : 0;
+    },
+    fmtTime: fmt,
+    async start() {
+      await this.initPlayer();
+      this.poll();
+      this.tick();
+    },
+    async initPlayer() {
+      try {
+        const { MidiPlayer } = await import('/static/midis/js/midi-player.js?v=11');
+        this.player = new MidiPlayer();
+        await this.player.init(
+          '/static/midis/audio/MuseScore_General.sf3',
+          '/static/midis/js/spessasynth_processor.min.js?v=7',
+        );
+        this.player.onTime = (t) => {
+          const now = performance.now();
+          if (now - this.lastUi > 100) { this.lastUi = now; this.pos = t; }
+          this.dur = this.player.duration();
+        };
+        this.player.setVolume(this.vol);
+        this.ready = true;
+      } catch (e) {
+        this.error = 'Audio engine failed to load: ' + e.message;
+        this.status = 'error';
+      }
+    },
+    async poll() {
+      if (this.status === 'ready') { window.location.href = DETAIL_URL; return; }
+      if (this.status === 'error') return;
+      try {
+        const r = await fetch(STATUS_URL, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const d = await r.json();
+        this.status = d.status;
+        this.progress = d.progress;
+        this.total = d.total;
+        this.error = d.error || '';
+        if (d.note_count !== this.lastCount) {
+          this.lastCount = d.note_count;
+          this.fetchNotes();
+        }
+      } catch (e) { /* transient */ }
+      setTimeout(() => this.poll(), 1000);
+    },
+    async fetchNotes() {
+      try {
+        const r = await fetch(NOTES_URL);
+        const data = await r.json();
+        this.notes = data;
+        this.player.setNotes(data);
+        if (this.player.playing) this.player.reschedule();
+        this.dur = this.player.duration();
+      } catch (e) { /* transient */ }
+    },
+    tick() {
+      const now = performance.now();
+      if (now - this.lastDraw > 33) {
+        this.lastDraw = now;
+        renderPianoRoll(document.getElementById('piano-roll'), this.notes, {
+          playhead: this.playing || this.pos > 0 ? (this.playing ? this.player.position() : this.pos) : 0,
+          follow: true,
+          window: 12,
+        });
+      }
+      requestAnimationFrame(() => this.tick());
+    },
+    async togglePlay() {
+      if (!this.ready || this.status === 'error') return;
+      if (this.playing) {
+        this.player.pause();
+        this.playing = false;
+      } else {
+        if (this.player.position() >= this.dur) this.player.seek(0);
+        await this.player.play();
+        this.playing = true;
+      }
+    },
+    seek(e) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      this.player.seek(pct * this.dur);
+      this.pos = this.player.position();
+    },
+  };
+};
+</script>
+{% endblock %}

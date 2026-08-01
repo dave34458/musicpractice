@@ -5,3 +5,6 @@ librosa
 ffmpeg-python
 requests
 beautifulsoup4
+muscriptor
+gunicorn
+whitenoise

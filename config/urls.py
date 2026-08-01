@@ -8,4 +8,5 @@ urlpatterns = [
     path('', include('backingtracks.urls')),
     path('', include('accounts.urls')),
     path('', include('chordfinder.urls')),
+    path('', include('midis.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

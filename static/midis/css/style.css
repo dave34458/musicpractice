@@ -1,0 +1,411 @@
+/* ============================================
+   MIDIs (MuScriptor) — Studio Theme
+   ============================================ */
+
+.midis-page { max-width: 1280px; margin: 0 auto; }
+
+.midis-sub {
+  color: var(--studio-muted);
+  font-size: 0.8125rem;
+  max-width: 520px;
+  line-height: 1.5;
+}
+
+/* ── Dropzone ── */
+.dropzone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-md);
+  padding: 0.625rem 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.dropzone:hover, .dropzone.drag {
+  border-color: var(--studio-amber);
+  background: var(--studio-amber-dim);
+}
+
+.dropzone svg { color: var(--studio-dim); flex: none; }
+
+.dropzone input[type='file'] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.btn-amber {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: var(--studio-amber);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  box-shadow: var(--studio-glow-amber);
+  transition: background 0.15s, transform 0.15s;
+  text-decoration: none;
+}
+
+.btn-amber:hover { background: var(--studio-orange); }
+.btn-amber:active { transform: scale(0.97); }
+.btn-amber:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: transparent;
+  color: var(--studio-muted);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btn-ghost:hover { color: var(--studio-amber); border-color: var(--studio-amber); }
+
+/* ── Status badges ── */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-queued { color: var(--studio-muted); background: rgba(255, 255, 255, 0.04); }
+.status-processing { color: var(--studio-amber); background: var(--studio-amber-dim); }
+.status-processing::before { animation: pulse 1s infinite; }
+.status-ready { color: var(--studio-green); background: rgba(34, 197, 94, 0.1); }
+.status-error { color: var(--studio-red); background: rgba(239, 68, 68, 0.1); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Processing / live view ── */
+.live-status-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.live-meta {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--studio-muted);
+}
+
+.piano-roll-wrap {
+  position: relative;
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-top: 1.25rem;
+}
+
+#piano-roll {
+  display: block;
+  width: 100%;
+  height: 420px;
+}
+
+#piano-roll.live { height: 300px; }
+
+/* ── Transport bar ── */
+.transport-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding: 0.625rem 1rem;
+  background: var(--studio-panel);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-lg);
+}
+
+.btn-play {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--studio-amber);
+  color: #fff;
+  box-shadow: var(--studio-glow-amber);
+  transition: background 0.15s, transform 0.15s;
+}
+
+.btn-play:hover { background: var(--studio-orange); transform: scale(1.05); }
+.btn-play:active { transform: scale(0.95); }
+.btn-play:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.transport-time {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--studio-muted);
+  min-width: 90px;
+}
+
+.transport-time b { color: var(--studio-text); font-weight: 500; }
+
+.transport-seek { flex: 1; min-width: 200px; }
+
+.vol-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--studio-muted);
+}
+
+.vol-control input[type='range'] {
+  width: 84px;
+  accent-color: var(--studio-amber);
+  cursor: pointer;
+}
+
+/* ── Detail console ── */
+.midis-detail-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding-bottom: 1.125rem;
+  border-bottom: 1px solid var(--studio-border);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--studio-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.back-link:hover { color: var(--studio-amber); }
+
+.midis-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  flex-wrap: wrap;
+}
+
+.midis-detail-row h1 {
+  font-size: 1.375rem;
+  margin: 0;
+}
+
+.midis-detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--studio-muted);
+}
+
+.midis-detail-meta i { font-style: normal; color: var(--studio-dim); }
+
+.midis-detail-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.125rem;
+}
+
+.midis-console {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.midis-stage { min-width: 0; }
+
+.midis-rail {
+  position: sticky;
+  top: 1rem;
+  margin-top: 1.25rem;
+  background: var(--studio-panel);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+}
+
+.midis-rail-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.875rem;
+}
+
+.midis-rail-head b {
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.midis-rail-head span {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--studio-dim);
+}
+
+/* ── Instrument channels ── */
+.inst-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.midis-rail .inst-chips {
+  flex-direction: column;
+  margin-top: 0;
+}
+
+.inst-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.3rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--studio-panel);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--studio-muted);
+  transition: border-color 0.15s;
+}
+
+.midis-rail .inst-chip {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.3rem 0.5rem;
+  padding: 0.5rem 0.625rem;
+  background: transparent;
+}
+
+.midis-rail .inst-chip:hover { border-color: var(--studio-dim); }
+
+.inst-chip-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inst-chip-count {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--studio-dim);
+}
+
+.inst-chip input[type='range'] {
+  width: 110px;
+  accent-color: var(--chip-color, var(--studio-amber));
+  cursor: pointer;
+}
+
+.midis-rail .inst-chip input[type='range'] {
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+.inst-chip b {
+  color: var(--studio-text);
+  font-weight: 500;
+}
+
+.inst-chip i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--chip-color, var(--studio-amber));
+}
+
+/* ── Error / empty ── */
+.midis-error {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--studio-red);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--studio-muted);
+}
+
+.empty-state svg { color: var(--studio-dim); margin-bottom: 1rem; }
+
+.empty-state h3 {
+  font-size: 1.125rem;
+  color: var(--studio-text);
+  margin-bottom: 0.375rem;
+}
+
+.empty-state p {
+  font-size: 0.8125rem;
+  max-width: 380px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .midis-console { grid-template-columns: 1fr; }
+  .midis-rail { position: static; }
+  #piano-roll { height: 320px; }
+}
+
+@media (max-width: 640px) {
+  #piano-roll { height: 240px; }
+  #piano-roll.live { height: 220px; }
+}

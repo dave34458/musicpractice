@@ -24,6 +24,8 @@ A web app that turns YouTube videos into practice tools for musicians.
 - Per-stem mute, solo, volume faders + master volume
 - Real-time frequency visualizer
 - Auto-thumbnail from YouTube
+- Audio → MIDI generation (MuScriptor) with live piano roll + in-browser MIDI playback
+- MIDI player — per-instrument volume, play along with original/mix
 
 **Planned:**
 - Chord detection
@@ -48,3 +50,17 @@ python manage.py runserver
 ```
 
 Open `http://127.0.0.1:8000/`, register, paste a YouTube URL.
+
+## MIDI generation
+
+The MuScriptor weights are not in the repo (gitignored, ~393 MB). Place the
+small model at `models/muscriptor-small.safetensors` (or point
+`MUSCRIPTOR_MODEL_PATH` at another file). Download it from Hugging Face —
+`MuScriptor/MuScriptor-small` (`model.safetensors`) — gated, so you need to
+accept the license and authenticate on the site first.
+
+The soundfont used for MIDI playback must also be downloaded once:
+`static/midis/audio/MuseScore_General.sf3` (~38 MB), from
+`MuScriptor/assets` on Hugging Face (ungated, MIT).
+
+> CPU-only machines: the model takes roughly 30 s per 30 s of audio to process.

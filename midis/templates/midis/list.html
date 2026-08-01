@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}MIDIs — MusicPractice{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/midis/css/style.css">
+{% endblock %}
+
+{% block content %}
+<div x-data="{ filter: 'all' }" class="animate-fade-up">
+  <div class="studio-header" style="margin-bottom:0.75rem;">
+    <div>
+      <h1 style="display:inline;font-size:1.375rem;">MIDIs</h1>
+      <span style="font-size:0.75rem;color:var(--studio-muted);font-family:var(--font-mono);margin-left:0.75rem;">{{ midis|length }} file{{ midis|length|pluralize }}</span>
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" x-data="uploadCard()" style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">
+    {% csrf_token %}
+    <label class="dropzone" :class="drag ? 'drag' : ''" @dragover.prevent="drag = true" @dragleave.prevent="drag = false" @drop.prevent="handleDrop($event)" style="flex:1;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span x-text="fileName ? 'Ready: ' + fileName : 'Drop audio here or click to browse — MP3, WAV, FLAC, OGG, M4A'" style="font-size:0.75rem;color:var(--studio-muted);"></span>
+      <input type="file" name="audio" accept="audio/*,.mp3,.wav,.flac,.ogg,.m4a,.aiff,.opus" @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''" style="display:none;">
+    </label>
+    <input type="text" name="title" placeholder="Title (optional)" class="input-studio" style="max-width:220px;">
+    <button type="submit" class="btn-studio" :disabled="!fileName">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21"/></svg>
+      Generate MIDI
+    </button>
+  </form>
+
+  {% if midis %}
+  <div class="filter-bar" style="margin-bottom:0.75rem;">
+    <button @click="filter = 'all'" :class="filter === 'all' ? 'active' : ''" class="filter-btn">All</button>
+    <button @click="filter = 'ready'" :class="filter === 'ready' ? 'active' : ''" class="filter-btn">Ready</button>
+    <button @click="filter = 'processing'" :class="filter === 'processing' ? 'active' : ''" class="filter-btn">Processing</button>
+    <button @click="filter = 'queued'" :class="filter === 'queued' ? 'active' : ''" class="filter-btn">Queued</button>
+    <button @click="filter = 'error'" :class="filter === 'error' ? 'active' : ''" class="filter-btn">Error</button>
+  </div>
+
+  <div style="background:var(--studio-panel);border:1px solid var(--studio-border);border-radius:var(--radius-lg);overflow:hidden;">
+    <div class="table-scroll">
+    <table style="width:100%;border-collapse:collapse;font-size:0.75rem;font-family:var(--font-mono);">
+      <thead>
+        <tr style="border-bottom:1px solid var(--studio-border);color:var(--studio-dim);font-size:0.625rem;text-transform:uppercase;letter-spacing:0.05em;">
+          <th style="padding:0.375rem 0.75rem;text-align:left;font-weight:500;width:36px;"></th>
+          <th style="padding:0.375rem 0.75rem;text-align:left;font-weight:500;">Title</th>
+          <th class="hide-mobile" style="padding:0.375rem 0.5rem;text-align:center;font-weight:500;">Duration</th>
+          <th class="hide-mobile" style="padding:0.375rem 0.5rem;text-align:center;font-weight:500;">Notes</th>
+          <th class="hide-mobile" style="padding:0.375rem 0.75rem;text-align:left;font-weight:500;">Date</th>
+          <th style="padding:0.375rem 0.75rem;text-align:center;font-weight:500;">Status</th>
+          <th style="padding:0.375rem 0.5rem;text-align:center;font-weight:500;width:64px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for midi in midis %}
+        <tr x-show="filter === 'all' || filter === '{{ midi.status }}'"
+            x-transition:enter="fade-up"
+            onclick="window.location='{% if midi.status == 'ready' %}{% url 'midis:detail' midi.id %}{% else %}{% url 'midis:status' midi.id %}{% endif %}'"
+            style="cursor:pointer;border-bottom:1px solid var(--studio-border);transition:background 0.15s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background=''">
+          <td style="padding:0.375rem 0.75rem;">
+            <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:var(--studio-surface);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+              <div style="font-size:0.75rem;font-weight:700;color:var(--studio-amber);">{{ midi.title|default:'♪'|first|upper }}</div>
+            </div>
+          </td>
+          <td style="padding:0.375rem 0.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;color:var(--studio-text);font-weight:500;font-family:var(--font-body);font-size:0.8125rem;">{{ midi.title|default:midi.audio.name|truncatechars:40 }}</td>
+          <td class="hide-mobile" style="padding:0.375rem 0.5rem;text-align:center;color:var(--studio-dim);">{% if midi.duration %}{{ midi.duration|floatformat:0 }}s{% else %}—{% endif %}</td>
+          <td class="hide-mobile" style="padding:0.375rem 0.5rem;text-align:center;color:var(--studio-dim);">{% if midi.note_count %}{{ midi.note_count }}{% else %}—{% endif %}</td>
+          <td class="hide-mobile" style="padding:0.375rem 0.75rem;color:var(--studio-muted);white-space:nowrap;">{{ midi.created_at|date:"M j, Y" }}</td>
+          <td style="padding:0.375rem 0.75rem;text-align:center;">
+            {% if midi.status == 'ready' %}
+              <span style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--studio-green);">
+                <span style="width:5px;height:5px;border-radius:50%;background:var(--studio-green);box-shadow:var(--studio-glow-green);"></span>
+                Ready
+              </span>
+            {% elif midi.status == 'error' %}
+              <span style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--studio-red);">
+                <span style="width:5px;height:5px;border-radius:50%;background:var(--studio-red);box-shadow:var(--studio-glow-red);"></span>
+                Error
+              </span>
+            {% else %}
+              <span style="display:inline-flex;align-items:center;gap:0.25rem;color:var(--studio-amber);">
+                <span style="width:5px;height:5px;border-radius:50%;background:var(--studio-amber);animation:pulse-dot 1.5s ease-in-out infinite;"></span>
+                {{ midi.get_status_display }}
+              </span>
+            {% endif %}
+          </td>
+          <td style="padding:0.375rem 0.5rem;text-align:center;">
+            {% if midi.status == 'ready' %}
+            <a href="{% url 'midis:download' midi.id %}" title="Download MIDI" onclick="event.stopPropagation()" style="width:24px;height:24px;border-radius:var(--radius-sm);display:inline-flex;align-items:center;justify-content:center;color:var(--studio-dim);text-decoration:none;transition:color 0.15s;vertical-align:middle;" onmouseover="this.style.color='var(--studio-amber)'" onmouseout="this.style.color='var(--studio-dim)'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </a>
+            {% endif %}
+            <form method="post" action="{% url 'midis:delete' midi.id %}" onclick="event.stopPropagation()" onsubmit="return confirm('Delete this MIDI?')" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" title="Delete" style="width:24px;height:24px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--studio-dim);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:color 0.15s;" onmouseover="this.style.color='var(--studio-red)'" onmouseout="this.style.color='var(--studio-dim)'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    <h3>No MIDIs yet</h3>
+    <p>Upload a song, a practice recording, or any audio — MuScriptor turns it into sheet-music-ready MIDI.</p>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+function uploadCard() {
+  return {
+    drag: false,
+    fileName: '',
+    handleDrop(e) {
+      this.drag = false;
+      if (e.dataTransfer.files.length) {
+        const input = this.$root.querySelector('input[type="file"]');
+        input.files = e.dataTransfer.files;
+        this.fileName = e.dataTransfer.files[0].name;
+      }
+    },
+  };
+}
+</script>
+{% endblock %}
