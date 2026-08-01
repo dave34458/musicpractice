@@ -1,5 +1,6 @@
 django>=4.2
 Pillow
+imageio-ffmpeg
 yt-dlp
 demucs
 librosa
