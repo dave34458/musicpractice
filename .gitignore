@@ -194,3 +194,6 @@ Thumbs.db
 logo-preview.html
 .opencode/
 CLAUDE.md
+
+# Large local-only model weights
+models/muscriptor-large.safetensors
