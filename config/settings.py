@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = Path(os.environ.get('RAILWAY_DATA_DIR', BASE_DIR))
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-nq^f5s+@p2h+k8-u$ht15n!9@oy=-ri8pb&9gkya6+_#2dyett')
 DEBUG = os.environ.get('DJANGO_DEBUG', 'true').lower() == 'true'
@@ -55,7 +56,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': DATA_DIR / 'db.sqlite3',
     }
 }
 
@@ -76,7 +77,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = DATA_DIR / 'media'
 
 # MuScriptor MIDI transcription model weights (local safetensors path).
 MUSCRIPTOR_MODEL_PATH = os.environ.get('MUSCRIPTOR_MODEL_PATH', BASE_DIR / 'models' / 'muscriptor-small.safetensors')
