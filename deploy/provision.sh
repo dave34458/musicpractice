@@ -13,9 +13,10 @@ GIT=https://github.com/dave34458/musicpractice.git
 
 log() { echo "[$(date -u +%H:%M:%S)] $*"; }
 
-# ---- data disk: format once, mount, persist in fstab ----
-mkdir -p $HOME_DIR $DATA_DIR
+# ---- user + data disk: format once, mount, persist in fstab ----
 id $APP_USER 2>/dev/null || useradd -m -s /bin/bash $APP_USER
+mkdir -p $HOME_DIR $DATA_DIR
+chown -R $APP_USER:$APP_USER $HOME_DIR
 if ! mountpoint -q $DATA_DIR; then
     if ! blkid $DATA_DEV >/dev/null 2>&1; then
         mkfs.ext4 -F $DATA_DEV
