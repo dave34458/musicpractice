@@ -57,8 +57,7 @@ def process_midi(midi_id):
         for event in model.transcribe(
             str(midi.audio.path),
             instruments=_instrument_names(midi.instruments) or None,
-            batch_size=4,
-            prelude_forcing=False,
+            prelude_forcing=True,
         ):
             events.append(event)
             if isinstance(event, ProgressEvent):
