@@ -1,0 +1,25 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to GCP VM
+        env:
+          SSH_KEY: ${{ secrets.VM_SSH_KEY }}
+          SSH_HOST: ${{ secrets.VM_HOST }}
+          SSH_USER: ${{ secrets.VM_USER }}
+        run: |
+          echo "$SSH_KEY" > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+          ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            "$SSH_USER@$SSH_HOST" "sudo bash -s" < deploy/deploy.sh
