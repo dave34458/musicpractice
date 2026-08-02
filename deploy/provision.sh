@@ -72,7 +72,7 @@ sudo -u $APP_USER $VENV/bin/pip install torch --index-url https://download.pytor
 sudo -u $APP_USER $VENV/bin/pip install -r $REPO/requirements.txt
 
 # ---- django ----
-sudo -u $APP_USER bash -c "cd $REPO && $VENV/bin/python manage.py migrate --noinput"
+sudo -u $APP_USER bash -c "set -a; . $DATA_DIR/musicpractice.env; set +a; cd $REPO && $VENV/bin/python manage.py migrate --noinput"
 sudo -u $APP_USER bash -c "cd $REPO && $VENV/bin/python manage.py collectstatic --noinput"
 
 # ---- services ----
