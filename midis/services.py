@@ -39,12 +39,17 @@ def _instrument_names(instruments):
     return [name.strip() for name in instruments.split(',') if name.strip() in valid]
 
 
+def _update_midi(midi_id, **fields):
+    return Midi.objects.filter(id=midi_id).update(**fields)
+
+
 def process_midi(midi_id):
     from muscriptor.events import NoteStartEvent, NoteEndEvent, ProgressEvent
 
-    midi = Midi.objects.get(id=midi_id)
-    midi.status = 'processing'
-    midi.save()
+    midi = Midi.objects.filter(id=midi_id).first()
+    if midi is None:
+        return
+    _update_midi(midi_id, status='processing')
     print(f'[worker] midi {midi_id} -> processing', flush=True)
 
     try:
@@ -61,11 +66,16 @@ def process_midi(midi_id):
         ):
             events.append(event)
             if isinstance(event, ProgressEvent):
-                midi.progress = event.completed
-                midi.total = event.total
-                midi.notes_json = json.dumps(list(notes.values()))
-                midi.note_count = len(notes)
-                midi.save()
+                updated = _update_midi(
+                    midi_id,
+                    progress=event.completed,
+                    total=event.total,
+                    notes_json=json.dumps(list(notes.values())),
+                    note_count=len(notes),
+                )
+                if not updated:
+                    print(f'[worker] midi {midi_id} deleted mid-process, aborting', flush=True)
+                    return
             elif isinstance(event, NoteStartEvent):
                 notes[event.index] = {
                     'pitch': event.pitch,
@@ -82,23 +92,30 @@ def process_midi(midi_id):
         midi_bytes = model.events_to_midi_bytes(iter(events))
         midi.midi.save(f'{midi.id}.mid', ContentFile(midi_bytes), save=False)
 
-        midi.notes_json = json.dumps(list(notes.values()))
-        midi.note_count = len(notes)
-        midi.duration = round(duration, 2)
-        midi.status = 'ready'
-        midi.save()
+        updated = _update_midi(
+            midi_id,
+            notes_json=json.dumps(list(notes.values())),
+            note_count=len(notes),
+            duration=round(duration, 2),
+            status='ready',
+        )
+        if not updated:
+            print(f'[worker] midi {midi_id} deleted mid-process, aborting', flush=True)
+            return
         print(f'[worker] midi {midi_id} -> ready', flush=True)
 
     except Exception:
         import traceback
         log_dir = Path(settings.MEDIA_ROOT) / 'logs'
         log_dir.mkdir(parents=True, exist_ok=True)
-        log_file = log_dir / f'midis_{midi.id}.log'
+        log_file = log_dir / f'midis_{midi_id}.log'
         with open(log_file, 'w') as f:
             traceback.print_exc(file=f)
-        midi.status = 'error'
-        midi.error_message = 'MIDI generation failed. Check media/logs for details.'
-        midi.save()
+        _update_midi(
+            midi_id,
+            status='error',
+            error_message='MIDI generation failed. Check media/logs for details.',
+        )
         print(f'[worker] midi {midi_id} -> error (see {log_file})', flush=True)
 
 
