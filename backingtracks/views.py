@@ -198,7 +198,7 @@ def track_player(request, track_id):
 @require_POST
 def delete_track(request, track_id):
     track = get_object_or_404(BackingTrack, id=track_id, user=request.user)
-    stem_dir = Path('media') / 'stems' / str(track.user.username) / str(track.id)
+    stem_dir = Path(settings.MEDIA_ROOT) / 'stems' / str(track.user.username) / str(track.id)
     if stem_dir.exists():
         shutil.rmtree(str(stem_dir))
     track.delete()

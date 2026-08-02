@@ -92,7 +92,7 @@ def process_midi(midi_id):
 
     except Exception:
         import traceback
-        log_dir = Path('media') / 'logs'
+        log_dir = Path(settings.MEDIA_ROOT) / 'logs'
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file = log_dir / f'midis_{midi.id}.log'
         with open(log_file, 'w') as f:

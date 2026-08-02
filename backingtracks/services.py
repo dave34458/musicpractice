@@ -6,6 +6,7 @@ import tempfile
 import time
 from pathlib import Path
 
+from django.conf import settings
 from django.core.files import File
 
 import imageio_ffmpeg
@@ -128,7 +129,7 @@ def process_track(track_id):
 
             result = subprocess.run(demucs_args, capture_output=True, text=True)
             if result.returncode != 0:
-                log_dir = Path('media') / 'logs'
+                log_dir = Path(settings.MEDIA_ROOT) / 'logs'
                 log_dir.mkdir(parents=True, exist_ok=True)
                 log_file = log_dir / f'demucs_{track.id}.log'
                 log_file.write_text(f'rc={result.returncode}\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}')
@@ -140,7 +141,7 @@ def process_track(track_id):
             else:
                 stem_files = sorted(sep_dir.glob('*.wav'))
 
-            stem_dir = Path('media') / 'stems' / track.user.username / str(track.id)
+            stem_dir = Path(settings.MEDIA_ROOT) / 'stems' / track.user.username / str(track.id)
             stem_dir.mkdir(parents=True, exist_ok=True)
 
             for stem_file in stem_files:
@@ -163,7 +164,7 @@ def process_track(track_id):
 
         except Exception:
             import traceback
-            log_dir = Path('media') / 'logs'
+            log_dir = Path(settings.MEDIA_ROOT) / 'logs'
             log_dir.mkdir(parents=True, exist_ok=True)
             log_file = log_dir / f'error_{track.id}.log'
             with open(log_file, 'w') as f:
