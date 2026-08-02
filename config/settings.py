@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = Path(os.environ.get('RAILWAY_DATA_DIR', BASE_DIR))
+DATA_DIR = Path(os.environ.get('DATA_DIR', BASE_DIR))
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-nq^f5s+@p2h+k8-u$ht15n!9@oy=-ri8pb&9gkya6+_#2dyett')
 DEBUG = os.environ.get('DJANGO_DEBUG', 'true').lower() == 'true'
@@ -57,6 +57,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': DATA_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 20,
+            'init_command': 'PRAGMA journal_mode=WAL;',
+        },
     }
 }
 
