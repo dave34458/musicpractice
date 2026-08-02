@@ -45,6 +45,7 @@ def process_midi(midi_id):
     midi = Midi.objects.get(id=midi_id)
     midi.status = 'processing'
     midi.save()
+    print(f'[worker] midi {midi_id} -> processing', flush=True)
 
     try:
         model = get_model()
@@ -87,6 +88,7 @@ def process_midi(midi_id):
         midi.duration = round(duration, 2)
         midi.status = 'ready'
         midi.save()
+        print(f'[worker] midi {midi_id} -> ready', flush=True)
 
     except Exception:
         import traceback
@@ -98,6 +100,7 @@ def process_midi(midi_id):
         midi.status = 'error'
         midi.error_message = 'MIDI generation failed. Check media/logs for details.'
         midi.save()
+        print(f'[worker] midi {midi_id} -> error (see {log_file})', flush=True)
 
 
 def worker_loop():
@@ -105,6 +108,7 @@ def worker_loop():
         try:
             midi = Midi.objects.filter(status='queued').order_by('created_at').first()
             if midi:
+                print(f'[worker] picking midi {midi.id}', flush=True)
                 process_midi(midi.id)
             else:
                 time.sleep(2)
@@ -117,3 +121,4 @@ def worker_loop():
 def start_worker():
     thread = threading.Thread(target=worker_loop, daemon=True)
     thread.start()
+    print(f'[worker] started (tid={thread.ident})', flush=True)
