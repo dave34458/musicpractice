@@ -6,6 +6,7 @@ ENVF=/home/musicpractice/data/musicpractice.env
 
 sudo -u musicpractice git -C "$REPO" pull --ff-only
 sudo cp "$REPO/deploy/nginx.conf" /etc/nginx/sites-available/musicpractice
+sudo certbot install --cert-name mscprctc.duckdns.org >/dev/null
 sudo nginx -t
 sudo systemctl reload nginx
 
