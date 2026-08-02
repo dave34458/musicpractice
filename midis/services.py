@@ -94,6 +94,7 @@ def process_midi(midi_id):
 
         updated = _update_midi(
             midi_id,
+            midi=midi.midi.name,
             notes_json=json.dumps(list(notes.values())),
             note_count=len(notes),
             duration=round(duration, 2),
