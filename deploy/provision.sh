@@ -46,7 +46,7 @@ fi
 # ---- system deps ----
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y python3.12-venv python3-pip ffmpeg nginx curl unzip ca-certificates git git-lfs openssl
+apt-get install -y python3.12-venv python3-pip ffmpeg nginx certbot python3-certbot-nginx curl unzip ca-certificates git git-lfs openssl
 git lfs install --system
 # ---- env (on data disk so it survives preemption) ----
 if [ ! -f $DATA_DIR/musicpractice.env ]; then
@@ -86,6 +86,9 @@ cp $REPO/deploy/musicpractice.service /etc/systemd/system/
 cp $REPO/deploy/nginx.conf /etc/nginx/sites-available/musicpractice
 ln -sf /etc/nginx/sites-available/musicpractice /etc/nginx/sites-enabled/musicpractice
 rm -f /etc/nginx/sites-enabled/default
+if [ -f /etc/letsencrypt/live/practicemusic.duckdns.org/fullchain.pem ]; then
+    certbot install --cert-name practicemusic.duckdns.org --redirect >/dev/null
+fi
 systemctl daemon-reload
 systemctl enable --now musicpractice
 systemctl restart nginx
