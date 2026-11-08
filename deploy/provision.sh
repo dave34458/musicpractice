@@ -10,6 +10,7 @@ DATA_DEV=/dev/disk/by-id/google-musicpractice-data
 VENV=$DATA_DIR/venv
 REPO=$HOME_DIR/musicpractice
 GIT=https://github.com/dave34458/musicpractice.git
+BRANCH=${MUSICPRACTICE_BRANCH:-main}
 
 log() { echo "[$(date -u +%H:%M:%S)] $*"; }
 
@@ -27,7 +28,8 @@ if ! mountpoint -q $DATA_DIR; then
 fi
 
 # ---- repo (fresh boot disk -> clone each time; LFS weights stay on data disk) ----
-[ -d $REPO/.git ] || sudo -u $APP_USER git clone $GIT $REPO
+[ -d $REPO/.git ] || sudo -u $APP_USER git clone --branch "$BRANCH" $GIT $REPO
+sudo -u $APP_USER git -C $REPO lfs pull
 chown -R $APP_USER:$APP_USER $HOME_DIR
 
 # ---- NVIDIA driver: once per data-disk lifetime, then reboot ----
@@ -44,7 +46,8 @@ fi
 # ---- system deps ----
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y python3.12-venv python3-pip ffmpeg nginx curl unzip ca-certificates git openssl
+apt-get install -y python3.12-venv python3-pip ffmpeg nginx curl unzip ca-certificates git git-lfs openssl
+git lfs install --system
 if ! command -v deno >/dev/null 2>&1; then
     curl -fsSL -o /tmp/deno.zip https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip
     unzip -o /tmp/deno.zip -d /usr/local/bin/
@@ -63,6 +66,14 @@ DATA_DIR=$DATA_DIR
 MUSCRIPTOR_MODEL_PATH=$DATA_DIR/models/muscriptor-small.safetensors
 EOF
     chown $APP_USER:$APP_USER $DATA_DIR/musicpractice.env
+fi
+
+MODEL_SRC=$REPO/models/muscriptor-small.safetensors
+MODEL_DST=$DATA_DIR/models/muscriptor-small.safetensors
+mkdir -p $DATA_DIR/models
+if [ -f $MODEL_SRC ] && [ "$(stat -c%s $MODEL_SRC)" -gt 1000000 ] && [ ! -f $MODEL_DST ]; then
+    cp $MODEL_SRC $MODEL_DST
+    chown $APP_USER:$APP_USER $MODEL_DST
 fi
 
 # ---- venv + python deps ----
