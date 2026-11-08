@@ -48,11 +48,6 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get install -y python3.12-venv python3-pip ffmpeg nginx curl unzip ca-certificates git git-lfs openssl
 git lfs install --system
-if ! command -v deno >/dev/null 2>&1; then
-    curl -fsSL -o /tmp/deno.zip https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip
-    unzip -o /tmp/deno.zip -d /usr/local/bin/
-fi
-
 # ---- env (on data disk so it survives preemption) ----
 if [ ! -f $DATA_DIR/musicpractice.env ]; then
     IP=$(curl -fsSL -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
