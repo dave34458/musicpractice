@@ -66,6 +66,7 @@ fi
 MODEL_SRC=$REPO/models/muscriptor-small.safetensors
 MODEL_DST=$DATA_DIR/models/muscriptor-small.safetensors
 mkdir -p $DATA_DIR/models
+chown $APP_USER:$APP_USER $DATA_DIR/models
 if [ -f $MODEL_SRC ] && [ "$(stat -c%s $MODEL_SRC)" -gt 1000000 ] && [ ! -f $MODEL_DST ]; then
     cp $MODEL_SRC $MODEL_DST
     chown $APP_USER:$APP_USER $MODEL_DST
