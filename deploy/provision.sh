@@ -55,8 +55,8 @@ if [ ! -f $DATA_DIR/musicpractice.env ]; then
     cat > $DATA_DIR/musicpractice.env <<EOF
 DJANGO_SECRET_KEY=$(openssl rand -hex 25)
 DJANGO_DEBUG=false
-DJANGO_ALLOWED_HOSTS=$IP
-DJANGO_CSRF_TRUSTED_ORIGINS=http://$IP
+DJANGO_ALLOWED_HOSTS=$IP,practicemusic.duckdns.org
+DJANGO_CSRF_TRUSTED_ORIGINS=http://$IP,http://practicemusic.duckdns.org,https://practicemusic.duckdns.org
 DATA_DIR=$DATA_DIR
 MUSCRIPTOR_MODEL_PATH=$DATA_DIR/models/muscriptor-small.safetensors
 EOF

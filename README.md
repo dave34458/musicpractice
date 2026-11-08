@@ -10,7 +10,7 @@ The goal is to get you to play and produce the songs you love better. MusicPract
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Deploy](https://img.shields.io/github/actions/workflow/status/dave34458/musicpractice/deploy.yml?style=flat-square&label=Deploy)](https://github.com/dave34458/musicpractice/actions)
 
-Live instance: [https://mscprctc.duckdns.org](https://mscprctc.duckdns.org)
+Live instance: [https://practicemusic.duckdns.org](https://practicemusic.duckdns.org)
 
 ## Features
 
@@ -57,7 +57,7 @@ The frontend is Django templates plus minimal Alpine.js; stems playback runs in 
 
 ## Development workflow
 
-Push to `main` triggers `.github/workflows/deploy.yml`, which SSHes to the GCP VM and runs `deploy/deploy.sh`. The service runs under systemd (`musicpractice.service`) behind nginx on `mscprctc.duckdns.org`.
+Push to `main` triggers `.github/workflows/deploy.yml`, which SSHes to the GCP VM and runs `deploy/deploy.sh`. The service runs under systemd (`musicpractice.service`) behind nginx on `practicemusic.duckdns.org`.
 
 ## Project structure
 
